@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Pronunciation Mystery Picture</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+
+      font-family: Arial, Helvetica, sans-serif;
+
+      background: #f4f6f8;
+
+      text-align: center;
+
+      color: #222;
+    }
+
+
+    h1 {
+      margin: 5px 0 8px;
+    }
+
+
+    .instructions {
+      margin-bottom: 15px;
+
+      font-size: 17px;
+
+      color: #555;
+    }
+
+
+    /* =========================
+       控制按鈕
+       ========================= */
+
+    #startButton {
+
+      padding: 13px 28px;
+
+      border: none;
+
+      border-radius: 30px;
+
+      background: #222;
+
+      color: white;
+
+      font-size: 18px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      margin-bottom: 15px;
+    }
+
+
+    #startButton:hover {
+      transform: scale(1.03);
+    }
+
+
+    #startButton:disabled {
+
+      opacity: 0.5;
+
+      cursor: default;
+
+      transform: none;
+    }
+
+
+    /* =========================
+       目前任務
+       ========================= */
+
+    #currentTask {
+
+      min-height: 45px;
+
+      margin: 5px 0 12px;
+
+      font-size: 23px;
+
+      font-weight: bold;
+    }
+
+
+    /* =========================
+       遊戲區
+       ========================= */
+
+    #game {
+
+      position: relative;
+
+      display: grid;
+
+      width: min(760px, 96vw);
+
+      aspect-ratio: 3 / 2;
+
+      margin: 0 auto;
+
+      background-image:
+        url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=85");
+
+      background-size: cover;
+
+      background-position: center;
+
+      border-radius: 18px;
+
+      overflow: hidden;
+
+      box-shadow:
+        0 8px 25px rgba(0,0,0,0.2);
+    }
+
+
+    /* =========================
+       單字卡
+       ========================= */
+
+    .word-card {
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      padding: 5px;
+
+      background: white;
+
+      border: 1px solid #777;
+
+      font-size: 18px;
+
+      font-weight: bold;
+
+      user-select: none;
+
+      transition:
+        opacity 0.45s ease,
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+    }
+
+
+    /* =========================
+       被電腦抽中的單字
+       ========================= */
+
+    .word-card.active {
+
+      background: #ffe45c;
+
+      border: 4px solid #ff9800;
+
+      transform: scale(1.08);
+
+      box-shadow:
+        0 0 18px rgba(255, 152, 0, 0.9);
+
+      z-index: 10;
+    }
+
+
+    /* =========================
+       正確後消失
+       ========================= */
+
+    .word-card.completed {
+
+      opacity: 0;
+
+      pointer-events: none;
+    }
+
+
+    /* =========================
+       聽到的結果
+       ========================= */
+
+    #message {
+
+      min-height: 32px;
+
+      margin-top: 16px;
+
+      font-size: 20px;
+
+      font-weight: bold;
+    }
+
+
+    #heard {
+
+      min-height: 28px;
+
+      margin-top: 4px;
+
+      font-size: 17px;
+
+      color: #555;
+    }
+
+
+    #progress {
+
+      margin-top: 10px;
+
+      font-size: 17px;
+
+      font-weight: bold;
+    }
+
+
+    #warning {
+
+      display: none;
+
+      max-width: 700px;
+
+      margin: 10px auto;
+
+      padding: 12px;
+
+      background: #ffe4e4;
+
+      color: #a00000;
+
+      border-radius: 10px;
+
+      font-weight: bold;
+    }
+
+
+    /* =========================
+       手機
+       ========================= */
+
+    @media (max-width: 650px) {
+
+      body {
+        padding: 10px;
+      }
+
+
+      h1 {
+        font-size: 23px;
+      }
+
+
+      .instructions {
+        font-size: 15px;
+      }
+
+
+      .word-card {
+        font-size: 13px;
+        padding: 2px;
+      }
+
+
+      .word-card.active {
+        transform: scale(1.05);
+      }
+
+
+      #currentTask {
+        font-size: 19px;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+<h1>
+  🎤 Pronunciation Mystery Picture
+</h1>
+
+
+<div class="instructions">
+
+  Watch for the highlighted word.<br>
+  Say it correctly to reveal the picture!
+
+</div>
+
+
+<div id="warning"></div>
+
+
+<button id="startButton">
+
+  🎤 Start Game
+
+</button>
+
+
+<div id="currentTask">
+
+  Click Start Game to begin.
+
+</div>
+
+
+<div id="game"></div>
+
+
+<div id="message"></div>
+
+
+<div id="heard"></div>
+
+
+<div id="progress"></div>
+
+
+
+<script>
+
+
+/* =========================================================
+   ⭐ 老師的單字表
+
+   以後要換單字，只改這裡即可。
+   ========================================================= */
+
+const words = [
+
+  "think",
+  "thank",
+  "three",
+  "the",
+  "this",
+  "that",
+
+  "time",
+  "name",
+  "same",
+  "game",
+  "phone",
+  "done",
+
+  "fun",
+  "man",
+  "moon",
+  "money",
+  "problem",
+  "sometimes",
+
+  "gift",
+  "past",
+  "next",
+  "world",
+  "word",
+  "first",
+
+  "friend",
+  "school",
+  "student",
+  "English",
+  "practice",
+  "speak"
+
+];
+
+
+
+/* =========================================================
+   基本變數
+   ========================================================= */
+
+let remainingCards = [];
+
+let currentCard = null;
+
+let recognition = null;
+
+let gameStarted = false;
+
+let listening = false;
+
+let completedCount = 0;
+
+
+
+/* =========================================================
+   Speech Recognition
+   ========================================================= */
+
+const SpeechRecognition =
+
+  window.SpeechRecognition ||
+
+  window.webkitSpeechRecognition;
+
+
+
+/* =========================================================
+   檢查瀏覽器支援
+   ========================================================= */
+
+if (!SpeechRecognition) {
+
+  const warning =
+    document.getElementById("warning");
+
+
+  warning.style.display =
+    "block";
+
+
+  warning.innerHTML =
+    "⚠️ Speech recognition is not supported in this browser.<br>" +
+    "Please open this page with Google Chrome or Microsoft Edge.";
+
+
+  document.getElementById(
+    "startButton"
+  ).disabled = true;
+
+}
+
+
+
+/* =========================================================
+   找出適合的長方形排列
+   ========================================================= */
+
+function findBestGrid(total) {
+
+  let bestColumns = total;
+
+  let bestRows = 1;
+
+  let bestDifference = Infinity;
+
+
+  /*
+    圖片比例大約 3:2，
+    所以希望 columns / rows 接近 1.5
+  */
+
+  const desiredRatio = 1.5;
+
+
+  for (
+    let rows = 1;
+    rows <= total;
+    rows++
+  ) {
+
+    if (
+      total % rows !== 0
+    ) {
+      continue;
+    }
+
+
+    const columns =
+      total / rows;
+
+
+    if (
+      columns < rows
+    ) {
+      continue;
+    }
+
+
+    const ratio =
+      columns / rows;
+
+
+    const difference =
+      Math.abs(
+        ratio -
+        desiredRatio
+      );
+
+
+    if (
+      difference <
+      bestDifference
+    ) {
+
+      bestDifference =
+        difference;
+
+      bestColumns =
+        columns;
+
+      bestRows =
+        rows;
+
+    }
+
+  }
+
+
+  return {
+
+    columns: bestColumns,
+
+    rows: bestRows
+
+  };
+
+}
+
+
+
+/* =========================================================
+   建立所有單字卡
+   ========================================================= */
+
+function createCards() {
+
+
+  const game =
+    document.getElementById(
+      "game"
+    );
+
+
+  game.innerHTML = "";
+
+
+  const grid =
+    findBestGrid(
+      words.length
+    );
+
+
+  game.style.gridTemplateColumns =
+    `repeat(${grid.columns}, 1fr)`;
+
+
+  game.style.gridTemplateRows =
+    `repeat(${grid.rows}, 1fr)`;
+
+
+  remainingCards = [];
+
+
+  words.forEach(
+    function(word) {
+
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "word-card";
+
+
+      card.textContent =
+        word;
+
+
+      card.dataset.word =
+        word;
+
+
+      game.appendChild(
+        card
+      );
+
+
+      remainingCards.push(
+        card
+      );
+
+    }
+
+  );
+
+
+  updateProgress();
+
+}
+
+
+
+/* =========================================================
+   Start Game
+   ========================================================= */
+
+document
+  .getElementById(
+    "startButton"
+  )
+  .addEventListener(
+
+    "click",
+
+    function() {
+
+
+      if (
+        !SpeechRecognition
+      ) {
+        return;
+      }
+
+
+      gameStarted =
+        true;
+
+
+      this.disabled =
+        true;
+
+
+      this.textContent =
+        "🎤 Game Running";
+
+
+      document.getElementById(
+        "message"
+      ).textContent =
+        "Get ready!";
+
+
+      /*
+        第一次啟動語音辨識。
+
+        因為這是由使用者點擊按鈕觸發，
+        瀏覽器應在這時要求麥克風權限。
+      */
+
+      chooseRandomWord();
+
+    }
+
+  );
+
+
+
+/* =========================================================
+   隨機挑下一個單字
+   ========================================================= */
+
+function chooseRandomWord() {
+
+
+  if (
+    remainingCards.length === 0
+  ) {
+
+    finishGame();
+
+    return;
+
+  }
+
+
+  /*
+    清除上一張 active 狀態
+  */
+
+  if (currentCard) {
+
+    currentCard.classList.remove(
+      "active"
+    );
+
+  }
+
+
+  /*
+    從剩下的字隨機抽一個
+  */
+
+  const randomIndex =
+    Math.floor(
+      Math.random() *
+      remainingCards.length
+    );
+
+
+  currentCard =
+    remainingCards[
+      randomIndex
+    ];
+
+
+  currentCard.classList.add(
+    "active"
+  );
+
+
+  const targetWord =
+    currentCard.dataset.word;
+
+
+  document.getElementById(
+    "currentTask"
+  ).textContent =
+    "🎯 Say the highlighted word!";
+
+
+  document.getElementById(
+    "message"
+  ).textContent =
+    "🎤 Listening...";
+
+
+  document.getElementById(
+    "heard"
+  ).textContent =
+    "";
+
+
+  /*
+    稍微停一下，
+    讓學生有時間看到新的黃色字卡
+  */
+
+  setTimeout(
+
+    function() {
+
+      startListening();
+
+    },
+
+    700
+
+  );
+
+}
+
+
+
+/* =========================================================
+   開始聽學生說話
+   ========================================================= */
+
+function startListening() {
+
+
+  if (
+    !gameStarted ||
+    !currentCard ||
+    listening
+  ) {
+
+    return;
+
+  }
+
+
+  recognition =
+    new SpeechRecognition();
+
+
+  recognition.lang =
+    "en-US";
+
+
+  recognition.continuous =
+    false;
+
+
+  recognition.interimResults =
+    false;
+
+
+  recognition.maxAlternatives =
+    5;
+
+
+  listening =
+    true;
+
+
+  const targetWord =
+    currentCard.dataset.word;
+
+
+
+  recognition.onstart =
+    function() {
+
+
+      document.getElementById(
+        "message"
+      ).textContent =
+        "🎤 Listening...";
+
+    };
+
+
+
+  /* =======================================================
+     收到語音辨識結果
+     ======================================================= */
+
+  recognition.onresult =
+    function(event) {
+
+
+      const alternatives =
+        event.results[0];
+
+
+      let correct =
+        false;
+
+
+      let firstResult =
+        "";
+
+
+      for (
+        let i = 0;
+        i < alternatives.length;
+        i++
+      ) {
+
+
+        const transcript =
+          normalizeText(
+            alternatives[i]
+              .transcript
+          );
+
+
+        if (
+          i === 0
+        ) {
+
+          firstResult =
+            transcript;
+
+        }
+
+
+        /*
+          必須完整辨識成目標單字才算正確。
+
+          例如目標是 think：
+
+          think      ✅
+          sink       ❌
+          I think    ❌
+          think dog  ❌
+
+          這樣可以降低學生亂唸
+          剛好碰到答案的機率。
+        */
+
+        if (
+          transcript ===
+          normalizeText(
+            targetWord
+          )
+        ) {
+
+          correct =
+            true;
+
+          break;
+
+        }
+
+      }
+
+
+
+      document.getElementById(
+        "heard"
+      ).textContent =
+        'I heard: "' +
+        firstResult +
+        '"';
+
+
+
+      if (correct) {
+
+        handleCorrect();
+
+      }
+
+      else {
+
+        handleWrong();
+
+      }
+
+  };
+
+
+
+  /* =======================================================
+     Recognition error
+     ======================================================= */
+
+  recognition.onerror =
+    function(event) {
+
+
+      listening =
+        false;
+
+
+      if (
+        event.error ===
+        "not-allowed"
+      ) {
+
+
+        document.getElementById(
+          "message"
+        ).textContent =
+          "🚫 Microphone permission was blocked.";
+
+
+        document.getElementById(
+          "startButton"
+        ).disabled =
+          false;
+
+
+        document.getElementById(
+          "startButton"
+        ).textContent =
+          "🎤 Try Microphone Again";
+
+
+        gameStarted =
+          false;
+
+
+        return;
+
+      }
+
+
+      if (
+        event.error ===
+        "no-speech"
+      ) {
+
+
+        document.getElementById(
+          "message"
+        ).textContent =
+          "🤔 I didn't hear anything. Try again.";
+
+
+        /*
+          同一個字再聽一次
+        */
+
+        setTimeout(
+
+          function() {
+
+            startListening();
+
+          },
+
+          1000
+
+        );
+
+
+        return;
+
+      }
+
+
+      document.getElementById(
+        "message"
+      ).textContent =
+        "⚠️ Let's try that word again.";
+
+
+      setTimeout(
+
+        function() {
+
+          startListening();
+
+        },
+
+        1000
+
+      );
+
+  };
+
+
+
+  /* =======================================================
+     辨識結束
+     ======================================================= */
+
+  recognition.onend =
+    function() {
+
+      listening =
+        false;
+
+  };
+
+
+
+  try {
+
+    recognition.start();
+
+  }
+
+
+  catch(error) {
+
+    listening =
+      false;
+
+
+    setTimeout(
+
+      function() {
+
+        startListening();
+
+      },
+
+      1000
+
+    );
+
+  }
+
+}
+
+
+
+/* =========================================================
+   清理辨識文字
+   ========================================================= */
+
+function normalizeText(text) {
+
+  return text
+
+    .toLowerCase()
+
+    .trim()
+
+    .replace(
+      /[^a-z']/g,
+      ""
+    );
+
+}
+
+
+
+/* =========================================================
+   答對
+   ========================================================= */
+
+function handleCorrect() {
+
+
+  listening =
+    false;
+
+
+  const finishedCard =
+    currentCard;
+
+
+  document.getElementById(
+    "message"
+  ).textContent =
+    "✅ Correct!";
+
+
+  finishedCard.classList.remove(
+    "active"
+  );
+
+
+  /*
+    卡片淡出
+  */
+
+  finishedCard.classList.add(
+    "completed"
+  );
+
+
+  /*
+    從尚未完成的卡片清單移除
+  */
+
+  remainingCards =
+    remainingCards.filter(
+
+      function(card) {
+
+        return card !==
+          finishedCard;
+
+      }
+
+    );
+
+
+  completedCount++;
+
+
+  updateProgress();
+
+
+  currentCard =
+    null;
+
+
+  /*
+    稍微停一下，
+    再抽下一個字
+  */
+
+  setTimeout(
+
+    function() {
+
+      chooseRandomWord();
+
+    },
+
+    900
+
+  );
+
+}
+
+
+
+/* =========================================================
+   答錯
+   ========================================================= */
+
+function handleWrong() {
+
+
+  listening =
+    false;
+
+
+  document.getElementById(
+    "message"
+  ).textContent =
+    "❌ Try again!";
+
+
+  /*
+    不換字。
+
+    同一張卡繼續保持黃色，
+    然後再聽一次。
+  */
+
+  setTimeout(
+
+    function() {
+
+
+      if (
+        currentCard
+      ) {
+
+
+        document.getElementById(
+          "message"
+        ).textContent =
+          "🎤 Listening...";
+
+
+        document.getElementById(
+          "heard"
+        ).textContent =
+          "";
+
+
+        startListening();
+
+      }
+
+    },
+
+    1100
+
+  );
+
+}
+
+
+
+/* =========================================================
+   更新進度
+   ========================================================= */
+
+function updateProgress() {
+
+
+  document.getElementById(
+    "progress"
+  ).textContent =
+    "Completed: " +
+    completedCount +
+    " / " +
+    words.length;
+
+}
+
+
+
+/* =========================================================
+   全部完成
+   ========================================================= */
+
+function finishGame() {
+
+
+  gameStarted =
+    false;
+
+
+  currentCard =
+    null;
+
+
+  document.getElementById(
+    "currentTask"
+  ).textContent =
+    "🎉 Challenge Completed!";
+
+
+  document.getElementById(
+    "message"
+  ).textContent =
+    "🏆 Great job!";
+
+
+  document.getElementById(
+    "heard"
+  ).textContent =
+    "";
+
+
+  document.getElementById(
+    "progress"
+  ).textContent =
+    words.length +
+    " / " +
+    words.length +
+    " words completed";
+
+
+  document.getElementById(
+    "startButton"
+  ).style.display =
+    "none";
+
+}
+
+
+
+/* =========================================================
+   建立遊戲
+   ========================================================= */
+
+createCards();
+
+
+</script>
+
+
+</body>
+
+</html>
