@@ -379,7 +379,58 @@ const FUNCTION_URL =
    PASS 標準
    ========================================================= */
 
-const MIN_ACCURACY = 60;
+const MIN_WORD_ACCURACY = 80;
+const MIN_TARGET_SOUND = 80;
+
+
+/*
+  每個單字真正要檢查的重點音。
+  陣列中的每一個音都必須 >= 80。
+
+  注意：
+  - 不是「所有 phoneme 都要 80」
+  - 只檢查老師指定的 target sound
+*/
+const TARGET_SOUNDS = {
+
+  think:      ["θ"],
+  thank:      ["θ"],
+  three:      ["θ"],
+
+  the:        ["ð"],
+  this:       ["ð"],
+  that:       ["ð"],
+
+  time:       ["m"],
+  name:       ["m"],
+  same:       ["m"],
+  game:       ["m"],
+
+  phone:      ["n"],
+  done:       ["n"],
+  fun:        ["n"],
+
+  man:        ["m"],
+  moon:       ["m"],
+  money:      ["m"],
+  problem:    ["m"],
+  sometimes:  ["m"],
+
+  gift:       ["f", "t"],
+  past:       ["s", "t"],
+  next:       ["k", "s", "t"],
+  world:      ["l", "d"],
+  word:       ["d"],
+  first:      ["s", "t"],
+
+  friend:     ["d"],
+  school:     ["s", "k"],
+  student:    ["s", "t"],
+  English:    ["ʃ"],
+  practice:   ["s"],
+  speak:      ["s", "p"]
+
+};
 
 
 
@@ -1321,129 +1372,259 @@ function normalizeText(text) {
 }
 
 
-function evaluatePronunciation(data) {
+function normalizePhoneme(symbol) {
 
-  const accuracy =
-    Number(
-      data.accuracyScore
-    );
+  return String(symbol || "")
+    .trim()
+    .replace(/[ˈˌ.]/g, "");
 
-
-  const expectedWord =
-    currentCard
-      ? normalizeText(
-          currentCard.dataset.word
-        )
-      : "";
+}
 
 
-  const recognizedWord =
-    normalizeText(
-      data.recognizedText
-    );
+function findTargetWordResult(data, targetWord) {
+
+  if (!Array.isArray(data.words)) {
+    return null;
+  }
 
 
-  const accuracyPass =
-
-    Number.isFinite(
-      accuracy
-    ) &&
-
-    accuracy >=
-      MIN_ACCURACY;
-
-
-  const recognizedPass =
-
-    expectedWord !== "" &&
-
-    recognizedWord ===
-      expectedWord;
+  const target =
+    normalizeText(targetWord);
 
 
   /*
-    正式判定：
-    1. Azure 辨識出的單字必須等於目標字
-    2. Accuracy >= 60
+    允許學生：
+    1. 單獨念目標字
+    2. 念一個包含目標字的短語
 
-    Phoneme 分數只作為診斷資訊，
-    不參與 PASS / TRY AGAIN。
+    例如字卡是 same：
+    "same" 或 "same thing" 都可以。
+
+    我們只抓 Azure 回傳中 same 這個 word 的分數，
+    其他單字完全不參與 PASS / FAIL。
   */
 
-  const finalPass =
+  for (const word of data.words) {
 
-    recognizedPass &&
+    if (
+      normalizeText(word.word) ===
+      target
+    ) {
+      return word;
+    }
 
-    accuracyPass;
+  }
 
 
-  const phonemeResults =
+  return null;
+
+}
+
+
+function findTargetPhonemes(wordResult, requiredSounds) {
+
+  const phonemes =
+    Array.isArray(wordResult?.phonemes)
+      ? wordResult.phonemes
+      : [];
+
+
+  const usedIndexes =
+    new Set();
+
+
+  const matches =
     [];
 
 
-  if (
-    Array.isArray(
-      data.words
-    )
-  ) {
+  for (const requiredSound of requiredSounds) {
 
-    data.words.forEach(
-      function(word) {
-
-        if (
-          !Array.isArray(
-            word.phonemes
-          )
-        ) {
-          return;
-        }
+    const wanted =
+      normalizePhoneme(requiredSound);
 
 
-        word.phonemes.forEach(
-          function(phoneme) {
-
-            const symbol =
-              phoneme.phoneme ||
-              "?";
+    let foundIndex =
+      -1;
 
 
-            const score =
-              Number(
-                phoneme.accuracyScore
-              );
+    for (
+      let i = 0;
+      i < phonemes.length;
+      i++
+    ) {
+
+      if (usedIndexes.has(i)) {
+        continue;
+      }
 
 
-            phonemeResults.push({
+      const actual =
+        normalizePhoneme(
+          phonemes[i].phoneme
+        );
 
-              symbol:
-                symbol,
 
-              score:
-                Number.isFinite(score)
-                  ? Math.round(score)
-                  : "-"
+      if (actual === wanted) {
 
-            });
+        foundIndex = i;
+        break;
 
-          }
+      }
+
+    }
+
+
+    if (foundIndex === -1) {
+
+      matches.push({
+
+        symbol:
+          requiredSound,
+
+        score:
+          null,
+
+        found:
+          false
+
+      });
+
+      continue;
+
+    }
+
+
+    usedIndexes.add(
+      foundIndex
+    );
+
+
+    const score =
+      Number(
+        phonemes[
+          foundIndex
+        ].accuracyScore
+      );
+
+
+    matches.push({
+
+      symbol:
+        requiredSound,
+
+      score:
+        Number.isFinite(score)
+          ? score
+          : null,
+
+      found:
+        true
+
+    });
+
+  }
+
+
+  return matches;
+
+}
+
+
+function evaluatePronunciation(data) {
+
+  const targetWord =
+    currentCard
+      ? currentCard.dataset.word
+      : "";
+
+
+  const wordResult =
+    findTargetWordResult(
+      data,
+      targetWord
+    );
+
+
+  /*
+    如果 Azure 在回傳的 Words 中找不到目標字，
+    就不能通過。
+
+    這也避免學生只念別的單字就過關。
+  */
+
+  const wordAccuracy =
+    Number(
+      wordResult?.accuracyScore
+    );
+
+
+  const wordPass =
+
+    Boolean(wordResult) &&
+
+    Number.isFinite(
+      wordAccuracy
+    ) &&
+
+    wordAccuracy >=
+      MIN_WORD_ACCURACY;
+
+
+  const requiredSounds =
+    TARGET_SOUNDS[
+      targetWord
+    ] || [];
+
+
+  const targetResults =
+    wordResult
+      ? findTargetPhonemes(
+          wordResult,
+          requiredSounds
+        )
+      : [];
+
+
+  const targetPass =
+
+    requiredSounds.length > 0 &&
+
+    targetResults.length ===
+      requiredSounds.length &&
+
+    targetResults.every(
+      function(item) {
+
+        return (
+          item.found &&
+          Number.isFinite(
+            item.score
+          ) &&
+          item.score >=
+            MIN_TARGET_SOUND
         );
 
       }
     );
 
-  }
+
+  /*
+    正式 PASS 標準：
+
+    1. Azure 的 Words 中必須找到目標字
+    2. 該目標字 Word Accuracy >= 80
+    3. 老師指定的每一個 Target Sound >= 80
+
+    其他 phoneme 不影響 PASS / FAIL。
+  */
+
+  const finalPass =
+    wordPass &&
+    targetPass;
 
 
   checking =
     false;
-
-
-  const accuracyDisplay =
-    Number.isFinite(
-      accuracy
-    )
-      ? Math.round(accuracy)
-      : "-";
 
 
   const recognizedDisplay =
@@ -1452,21 +1633,26 @@ function evaluatePronunciation(data) {
       : "-";
 
 
-  let detailsText =
+  const wordAccuracyDisplay =
+    Number.isFinite(
+      wordAccuracy
+    )
+      ? Math.round(
+          wordAccuracy
+        )
+      : "-";
 
-    "Recognized: " +
-    recognizedDisplay +
 
-    " | Accuracy: " +
-    accuracyDisplay;
+  let targetDisplay =
+    "no target data";
 
 
   if (
-    phonemeResults.length > 0
+    targetResults.length > 0
   ) {
 
-    const phonemeText =
-      phonemeResults
+    targetDisplay =
+      targetResults
         .map(
           function(item) {
 
@@ -1474,30 +1660,113 @@ function evaluatePronunciation(data) {
               "/" +
               item.symbol +
               "/ " +
-              item.score
+              (
+                Number.isFinite(
+                  item.score
+                )
+                  ? Math.round(
+                      item.score
+                    )
+                  : "-"
+              )
             );
 
           }
         )
         .join(" · ");
 
-
-    detailsText +=
-      " | Phonemes: " +
-      phonemeText;
-
   }
 
-  else {
 
-    detailsText +=
-      " | Phonemes: no data";
+  /*
+    測試階段保留完整 phoneme 資訊，
+    方便老師觀察 Azure 評分。
+  */
+
+  let allPhonemeDisplay =
+    "no data";
+
+
+  if (
+    wordResult &&
+    Array.isArray(
+      wordResult.phonemes
+    ) &&
+    wordResult.phonemes.length > 0
+  ) {
+
+    allPhonemeDisplay =
+      wordResult.phonemes
+        .map(
+          function(phoneme) {
+
+            const score =
+              Number(
+                phoneme.accuracyScore
+              );
+
+
+            return (
+              "/" +
+              (
+                phoneme.phoneme ||
+                "?"
+              ) +
+              "/ " +
+              (
+                Number.isFinite(score)
+                  ? Math.round(score)
+                  : "-"
+              )
+            );
+
+          }
+        )
+        .join(" · ");
 
   }
 
 
   scoreDetails.textContent =
-    detailsText;
+
+    "Recognized: " +
+    recognizedDisplay +
+
+    " | Word: " +
+    targetWord +
+
+    " " +
+    wordAccuracyDisplay +
+
+    " | Target: " +
+    targetDisplay +
+
+    " | All phonemes: " +
+    allPhonemeDisplay;
+
+
+  if (!wordResult) {
+
+    messageBox.textContent =
+      'I could not find "' +
+      targetWord +
+      '" in what you said. Try the word again, or say a short phrase containing it.';
+
+  }
+
+  else if (!wordPass) {
+
+    messageBox.textContent =
+      "Word Accuracy needs 80 or higher.";
+
+  }
+
+  else if (!targetPass) {
+
+    messageBox.textContent =
+      "Target sound needs 80 or higher.";
+
+  }
 
 
   if (finalPass) {
@@ -1513,7 +1782,6 @@ function evaluatePronunciation(data) {
   }
 
 }
-
 
 /* =========================================================
    PASS
