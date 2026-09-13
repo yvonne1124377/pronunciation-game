@@ -379,9 +379,8 @@ const FUNCTION_URL =
    PASS 標準
    ========================================================= */
 
-const MIN_ACCURACY = 90;
+const MIN_ACCURACY = 80;
 
-const MIN_PHONEME_SCORE = 80;
 
 
 
@@ -1321,7 +1320,15 @@ function evaluatePronunciation(data) {
     );
 
 
-  const accuracyPass =
+  /*
+    診斷版 PASS 標準：
+    只看整體 Accuracy >= 80。
+
+    Phoneme 分數只顯示，
+    不參與 PASS / TRY AGAIN 判定。
+  */
+
+  const finalPass =
 
     Number.isFinite(
       accuracy
@@ -1331,16 +1338,8 @@ function evaluatePronunciation(data) {
       MIN_ACCURACY;
 
 
-  let phonemeCount =
-    0;
-
-
-  let allPhonemesPass =
-    true;
-
-
-  let lowestPhonemeScore =
-    Infinity;
+  const phonemeResults =
+    [];
 
 
   if (
@@ -1364,7 +1363,9 @@ function evaluatePronunciation(data) {
         word.phonemes.forEach(
           function(phoneme) {
 
-            phonemeCount++;
+            const symbol =
+              phoneme.phoneme ||
+              "?";
 
 
             const score =
@@ -1373,78 +1374,25 @@ function evaluatePronunciation(data) {
               );
 
 
-            if (
-              !Number.isFinite(
-                score
-              )
-            ) {
+            phonemeResults.push({
 
-              allPhonemesPass =
-                false;
+              symbol:
+                symbol,
 
-              return;
+              score:
+                Number.isFinite(score)
+                  ? Math.round(score)
+                  : "-"
 
-            }
-
-
-            if (
-              score <
-              lowestPhonemeScore
-            ) {
-
-              lowestPhonemeScore =
-                score;
-
-            }
-
-
-            if (
-              score <
-              MIN_PHONEME_SCORE
-            ) {
-
-              allPhonemesPass =
-                false;
-
-            }
+            });
 
           }
-
         );
 
       }
-
     );
 
   }
-
-
-  if (
-    phonemeCount === 0
-  ) {
-
-    allPhonemesPass =
-      false;
-
-  }
-
-
-  /*
-    ★ 注意：
-    這裡已經完全取消 recognizedText 判定。
-
-    PASS 只看：
-    1. Accuracy >= 90
-    2. 每個 phoneme >= 80
-  */
-
-  const finalPass =
-
-    accuracyPass &&
-
-    allPhonemesPass &&
-
-    phonemeCount > 0;
 
 
   checking =
@@ -1459,25 +1407,48 @@ function evaluatePronunciation(data) {
       : "-";
 
 
-  const phonemeDisplay =
-    Number.isFinite(
-      lowestPhonemeScore
-    )
-      ? Math.round(
-          lowestPhonemeScore
+  let detailsText =
+    "Accuracy: " +
+    accuracyDisplay;
+
+
+  if (
+    phonemeResults.length > 0
+  ) {
+
+    const phonemeText =
+      phonemeResults
+        .map(
+          function(item) {
+
+            return (
+              "/" +
+              item.symbol +
+              "/ " +
+              item.score
+            );
+
+          }
         )
-      : "-";
+        .join(" · ");
+
+
+    detailsText +=
+      " | Phonemes: " +
+      phonemeText;
+
+  }
+
+  else {
+
+    detailsText +=
+      " | Phonemes: no data";
+
+  }
 
 
   scoreDetails.textContent =
-
-    "Accuracy: " +
-
-    accuracyDisplay +
-
-    " | Lowest phoneme: " +
-
-    phonemeDisplay;
+    detailsText;
 
 
   if (finalPass) {
@@ -1493,7 +1464,6 @@ function evaluatePronunciation(data) {
   }
 
 }
-
 
 
 /* =========================================================
