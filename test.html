@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Pronunciation Test - the</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 15px;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background: #f4f6f8;
+
+      color: #222;
+
+      text-align: center;
+    }
+
+
+    .container {
+
+      max-width: 650px;
+
+      margin: 0 auto;
+
+      background: white;
+
+      padding: 30px;
+
+      border-radius: 20px;
+
+      box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+
+    h1 {
+
+      margin-top: 0;
+
+      font-size: 30px;
+    }
+
+
+    .target-label {
+
+      margin-top: 25px;
+
+      font-size: 18px;
+
+      color: #666;
+    }
+
+
+    .target-word {
+
+      margin: 10px 0 25px;
+
+      font-size: 80px;
+
+      font-weight: bold;
+
+      color: #222;
+    }
+
+
+    button {
+
+      border: none;
+
+      border-radius: 30px;
+
+      padding: 14px 28px;
+
+      margin: 7px;
+
+      font-size: 18px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+    }
+
+
+    #recordButton {
+
+      background: #222;
+
+      color: white;
+    }
+
+
+    #stopButton {
+
+      background: #e53935;
+
+      color: white;
+    }
+
+
+    button:disabled {
+
+      opacity: 0.4;
+
+      cursor: default;
+    }
+
+
+    #status {
+
+      margin-top: 20px;
+
+      min-height: 30px;
+
+      font-size: 19px;
+
+      font-weight: bold;
+    }
+
+
+    .recording {
+
+      color: #d32f2f;
+    }
+
+
+    .results {
+
+      display: none;
+
+      margin-top: 25px;
+
+      text-align: left;
+    }
+
+
+    .score-box {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 12px;
+
+      margin-top: 15px;
+    }
+
+
+    .score {
+
+      padding: 18px 10px;
+
+      background: #f3f4f6;
+
+      border-radius: 14px;
+
+      text-align: center;
+    }
+
+
+    .score-number {
+
+      display: block;
+
+      margin-top: 5px;
+
+      font-size: 32px;
+
+      font-weight: bold;
+    }
+
+
+    .recognized {
+
+      margin-top: 20px;
+
+      padding: 15px;
+
+      background: #f7f7f7;
+
+      border-radius: 12px;
+
+      font-size: 17px;
+    }
+
+
+    .phoneme-title {
+
+      margin-top: 25px;
+
+      font-size: 21px;
+
+      font-weight: bold;
+    }
+
+
+    .phoneme {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      margin-top: 10px;
+
+      padding: 15px 20px;
+
+      background: #f3f4f6;
+
+      border-radius: 12px;
+    }
+
+
+    .phoneme-symbol {
+
+      font-size: 30px;
+
+      font-weight: bold;
+    }
+
+
+    .phoneme-score {
+
+      font-size: 22px;
+
+      font-weight: bold;
+    }
+
+
+    .error {
+
+      margin-top: 15px;
+
+      padding: 15px;
+
+      border-radius: 10px;
+
+      background: #ffe5e5;
+
+      color: #a00000;
+
+      word-break: break-word;
+    }
+
+
+    .note {
+
+      margin-top: 25px;
+
+      color: #666;
+
+      line-height: 1.6;
+
+      font-size: 15px;
+    }
+
+
+    @media (max-width: 500px) {
+
+      .container {
+        padding: 20px;
+      }
+
+      .target-word {
+        font-size: 65px;
+      }
+
+      .score-box {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+  <h1>🎤 Pronunciation Test</h1>
+
+
+  <div class="target-label">
+
+    Say this word:
+
+  </div>
+
+
+  <div class="target-word">
+
+    the
+
+  </div>
+
+
+  <button id="recordButton">
+
+    🎤 Start Recording
+
+  </button>
+
+
+  <button
+    id="stopButton"
+    disabled
+  >
+
+    ⏹ Stop & Score
+
+  </button>
+
+
+  <div id="status">
+
+    Press Start Recording.
+
+  </div>
+
+
+  <div
+    id="results"
+    class="results"
+  >
+
+
+    <div class="score-box">
+
+
+      <div class="score">
+
+        Pronunciation
+
+        <span
+          id="pronScore"
+          class="score-number"
+        >
+          -
+        </span>
+
+      </div>
+
+
+      <div class="score">
+
+        Accuracy
+
+        <span
+          id="accuracyScore"
+          class="score-number"
+        >
+          -
+        </span>
+
+      </div>
+
+
+    </div>
+
+
+    <div
+      id="recognized"
+      class="recognized"
+    >
+    </div>
+
+
+    <div class="phoneme-title">
+
+      Phoneme scores
+
+    </div>
+
+
+    <div id="phonemes">
+
+    </div>
+
+
+  </div>
+
+
+  <div
+    id="errorBox"
+    class="error"
+    style="display:none;"
+  >
+  </div>
+
+
+  <div class="note">
+
+    Test idea:
+    first pronounce <b>the</b> normally.
+    Then try again without putting your tongue
+    between your teeth and compare the scores.
+
+  </div>
+
+
+</div>
+
+
+
+<script>
+
+
+// ======================================================
+// IMPORTANT
+// Paste your Function URL here.
+//
+// Do NOT include ?code=...
+// ======================================================
+
+const FUNCTION_URL =
+  "https://yvonne-pronunciation-api-c4gvc3hwergxcydd.southeastasia-01.azurewebsites.net/api/pronunciation";
+
+
+// Word we are testing
+
+const TARGET_WORD = "the";
+
+
+// Azure wants 16 kHz mono PCM WAV.
+
+const TARGET_SAMPLE_RATE = 16000;
+
+
+// ======================================================
+// Variables
+// ======================================================
+
+let audioContext = null;
+
+let microphoneStream = null;
+
+let sourceNode = null;
+
+let processorNode = null;
+
+let audioChunks = [];
+
+let inputSampleRate = 44100;
+
+let recording = false;
+
+
+// ======================================================
+// Elements
+// ======================================================
+
+const recordButton =
+  document.getElementById("recordButton");
+
+const stopButton =
+  document.getElementById("stopButton");
+
+const statusBox =
+  document.getElementById("status");
+
+const resultsBox =
+  document.getElementById("results");
+
+const errorBox =
+  document.getElementById("errorBox");
+
+
+// ======================================================
+// Start recording
+// ======================================================
+
+recordButton.addEventListener(
+  "click",
+  startRecording
+);
+
+
+async function startRecording() {
+
+  hideError();
+
+  resultsBox.style.display = "none";
+
+  audioChunks = [];
+
+
+  try {
+
+    microphoneStream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+
+
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+
+    inputSampleRate =
+      audioContext.sampleRate;
+
+
+    sourceNode =
+      audioContext.createMediaStreamSource(
+        microphoneStream
+      );
+
+
+    // ScriptProcessor is used here because
+    // it is simple and works well for this
+    // small pronunciation test.
+
+    processorNode =
+      audioContext.createScriptProcessor(
+        4096,
+        1,
+        1
+      );
+
+
+    processorNode.onaudioprocess =
+      function(event) {
+
+        if (!recording) {
+          return;
+        }
+
+
+        const input =
+          event
+            .inputBuffer
+            .getChannelData(0);
+
+
+        audioChunks.push(
+          new Float32Array(input)
+        );
+
+      };
+
+
+    sourceNode.connect(
+      processorNode
+    );
+
+
+    processorNode.connect(
+      audioContext.destination
+    );
+
+
+    recording = true;
+
+
+    recordButton.disabled = true;
+
+    stopButton.disabled = false;
+
+
+    statusBox.className =
+      "recording";
+
+    statusBox.textContent =
+      "🔴 Recording... Say “the” once.";
+
+
+  }
+
+  catch (error) {
+
+    showError(
+      "Microphone error: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// Stop recording
+// ======================================================
+
+stopButton.addEventListener(
+  "click",
+  stopRecording
+);
+
+
+async function stopRecording() {
+
+  if (!recording) {
+    return;
+  }
+
+
+  recording = false;
+
+
+  recordButton.disabled = true;
+
+  stopButton.disabled = true;
+
+
+  statusBox.className = "";
+
+  statusBox.textContent =
+    "⏳ Preparing audio...";
+
+
+  // Stop microphone
+
+  if (microphoneStream) {
+
+    microphoneStream
+      .getTracks()
+      .forEach(
+        track => track.stop()
+      );
+
+  }
+
+
+  // Disconnect nodes
+
+  if (processorNode) {
+
+    processorNode.disconnect();
+
+  }
+
+
+  if (sourceNode) {
+
+    sourceNode.disconnect();
+
+  }
+
+
+  // Combine audio chunks
+
+  const combined =
+    mergeBuffers(audioChunks);
+
+
+  // Convert sample rate to 16000 Hz
+
+  const downsampled =
+    downsampleBuffer(
+      combined,
+      inputSampleRate,
+      TARGET_SAMPLE_RATE
+    );
+
+
+  // Encode WAV
+
+  const wavBuffer =
+    encodeWAV(
+      downsampled,
+      TARGET_SAMPLE_RATE
+    );
+
+
+  // Convert WAV to Base64
+
+  const base64Audio =
+    arrayBufferToBase64(
+      wavBuffer
+    );
+
+
+  if (audioContext) {
+
+    await audioContext.close();
+
+  }
+
+
+  statusBox.textContent =
+    "☁️ Sending pronunciation to Azure...";
+
+
+  await sendToAzure(
+    base64Audio
+  );
+
+}
+
+
+// ======================================================
+// Merge Float32 chunks
+// ======================================================
+
+function mergeBuffers(chunks) {
+
+  let totalLength = 0;
+
+
+  chunks.forEach(
+    chunk => {
+
+      totalLength +=
+        chunk.length;
+
+    }
+  );
+
+
+  const result =
+    new Float32Array(
+      totalLength
+    );
+
+
+  let offset = 0;
+
+
+  chunks.forEach(
+    chunk => {
+
+      result.set(
+        chunk,
+        offset
+      );
+
+      offset +=
+        chunk.length;
+
+    }
+  );
+
+
+  return result;
+
+}
+
+
+// ======================================================
+// Downsample audio
+// ======================================================
+
+function downsampleBuffer(
+  buffer,
+  sourceRate,
+  targetRate
+) {
+
+  if (targetRate === sourceRate) {
+
+    return buffer;
+
+  }
+
+
+  if (targetRate > sourceRate) {
+
+    throw new Error(
+      "Target sample rate must be lower than input sample rate."
+    );
+
+  }
+
+
+  const ratio =
+    sourceRate /
+    targetRate;
+
+
+  const newLength =
+    Math.round(
+      buffer.length /
+      ratio
+    );
+
+
+  const result =
+    new Float32Array(
+      newLength
+    );
+
+
+  let resultIndex = 0;
+
+  let bufferIndex = 0;
+
+
+  while (
+    resultIndex <
+    result.length
+  ) {
+
+    const nextBufferIndex =
+      Math.round(
+        (resultIndex + 1) *
+        ratio
+      );
+
+
+    let total = 0;
+
+    let count = 0;
+
+
+    for (
+      let i = bufferIndex;
+      i < nextBufferIndex &&
+      i < buffer.length;
+      i++
+    ) {
+
+      total += buffer[i];
+
+      count++;
+
+    }
+
+
+    result[resultIndex] =
+      count > 0
+        ? total / count
+        : 0;
+
+
+    resultIndex++;
+
+    bufferIndex =
+      nextBufferIndex;
+
+  }
+
+
+  return result;
+
+}
+
+
+// ======================================================
+// Encode PCM WAV
+// ======================================================
+
+function encodeWAV(
+  samples,
+  sampleRate
+) {
+
+  const buffer =
+    new ArrayBuffer(
+      44 +
+      samples.length * 2
+    );
+
+
+  const view =
+    new DataView(
+      buffer
+    );
+
+
+  writeString(
+    view,
+    0,
+    "RIFF"
+  );
+
+
+  view.setUint32(
+    4,
+    36 +
+    samples.length * 2,
+    true
+  );
+
+
+  writeString(
+    view,
+    8,
+    "WAVE"
+  );
+
+
+  writeString(
+    view,
+    12,
+    "fmt "
+  );
+
+
+  view.setUint32(
+    16,
+    16,
+    true
+  );
+
+
+  // PCM
+
+  view.setUint16(
+    20,
+    1,
+    true
+  );
+
+
+  // mono
+
+  view.setUint16(
+    22,
+    1,
+    true
+  );
+
+
+  view.setUint32(
+    24,
+    sampleRate,
+    true
+  );
+
+
+  view.setUint32(
+    28,
+    sampleRate * 2,
+    true
+  );
+
+
+  view.setUint16(
+    32,
+    2,
+    true
+  );
+
+
+  // 16 bit
+
+  view.setUint16(
+    34,
+    16,
+    true
+  );
+
+
+  writeString(
+    view,
+    36,
+    "data"
+  );
+
+
+  view.setUint32(
+    40,
+    samples.length * 2,
+    true
+  );
+
+
+  floatTo16BitPCM(
+    view,
+    44,
+    samples
+  );
+
+
+  return buffer;
+
+}
+
+
+// ======================================================
+// Float audio -> signed 16-bit PCM
+// ======================================================
+
+function floatTo16BitPCM(
+  view,
+  offset,
+  samples
+) {
+
+  for (
+    let i = 0;
+    i < samples.length;
+    i++,
+    offset += 2
+  ) {
+
+    let sample =
+      Math.max(
+        -1,
+        Math.min(
+          1,
+          samples[i]
+        )
+      );
+
+
+    view.setInt16(
+      offset,
+
+      sample < 0
+        ? sample * 0x8000
+        : sample * 0x7FFF,
+
+      true
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// WAV string helper
+// ======================================================
+
+function writeString(
+  view,
+  offset,
+  string
+) {
+
+  for (
+    let i = 0;
+    i < string.length;
+    i++
+  ) {
+
+    view.setUint8(
+      offset + i,
+      string.charCodeAt(i)
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// ArrayBuffer -> Base64
+// ======================================================
+
+function arrayBufferToBase64(
+  buffer
+) {
+
+  const bytes =
+    new Uint8Array(
+      buffer
+    );
+
+
+  let binary = "";
+
+
+  const chunkSize =
+    0x8000;
+
+
+  for (
+    let i = 0;
+    i < bytes.length;
+    i += chunkSize
+  ) {
+
+    const chunk =
+      bytes.subarray(
+        i,
+        Math.min(
+          i + chunkSize,
+          bytes.length
+        )
+      );
+
+
+    binary +=
+      String.fromCharCode.apply(
+        null,
+        chunk
+      );
+
+  }
+
+
+  return btoa(binary);
+
+}
+
+
+// ======================================================
+// Send to Azure Function
+// ======================================================
+
+async function sendToAzure(
+  audioBase64
+) {
+
+  try {
+
+
+    if (
+      FUNCTION_URL.includes(
+        "PASTE_YOUR_FUNCTION_URL_HERE"
+      )
+    ) {
+
+      throw new Error(
+        "Please paste your Azure Function URL into FUNCTION_URL first."
+      );
+
+    }
+
+
+    const response =
+      await fetch(
+        FUNCTION_URL,
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              referenceText:
+                TARGET_WORD,
+
+              audioBase64:
+                audioBase64
+            })
+
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.details ||
+        data.error ||
+        (
+          "HTTP error " +
+          response.status
+        )
+      );
+
+    }
+
+
+    if (!data.ok) {
+
+      throw new Error(
+        data.error ||
+        "Pronunciation assessment failed."
+      );
+
+    }
+
+
+    displayResults(
+      data
+    );
+
+
+  }
+
+  catch (error) {
+
+    showError(
+      error.message
+    );
+
+
+    statusBox.textContent =
+      "❌ Test failed.";
+
+  }
+
+
+  recordButton.disabled =
+    false;
+
+}
+
+
+// ======================================================
+// Display result
+// ======================================================
+
+function displayResults(
+  data
+) {
+
+  statusBox.textContent =
+    "✅ Assessment complete!";
+
+
+  document
+    .getElementById(
+      "pronScore"
+    )
+    .textContent =
+      scoreText(
+        data.pronunciationScore
+      );
+
+
+  document
+    .getElementById(
+      "accuracyScore"
+    )
+    .textContent =
+      scoreText(
+        data.accuracyScore
+      );
+
+
+  document
+    .getElementById(
+      "recognized"
+    )
+    .innerHTML =
+
+      "<b>Azure heard:</b> " +
+
+      escapeHTML(
+        data.recognizedText ||
+        "(nothing)"
+      );
+
+
+  const phonemeBox =
+    document.getElementById(
+      "phonemes"
+    );
+
+
+  phonemeBox.innerHTML = "";
+
+
+  if (
+    data.words &&
+    data.words.length > 0
+  ) {
+
+
+    data.words.forEach(
+      word => {
+
+
+        if (
+          !word.phonemes
+        ) {
+          return;
+        }
+
+
+        word.phonemes.forEach(
+          phoneme => {
+
+
+            const row =
+              document.createElement(
+                "div"
+              );
+
+
+            row.className =
+              "phoneme";
+
+
+            const symbol =
+              document.createElement(
+                "div"
+              );
+
+
+            symbol.className =
+              "phoneme-symbol";
+
+
+            symbol.textContent =
+              phoneme.phoneme ||
+              "?";
+
+
+            const score =
+              document.createElement(
+                "div"
+              );
+
+
+            score.className =
+              "phoneme-score";
+
+
+            score.textContent =
+              scoreText(
+                phoneme.accuracyScore
+              ) +
+              " / 100";
+
+
+            row.appendChild(
+              symbol
+            );
+
+
+            row.appendChild(
+              score
+            );
+
+
+            phonemeBox.appendChild(
+              row
+            );
+
+
+          }
+        );
+
+
+      }
+    );
+
+  }
+
+
+  if (
+    phonemeBox.children.length === 0
+  ) {
+
+    phonemeBox.innerHTML =
+      "<p>No phoneme scores returned.</p>";
+
+  }
+
+
+  resultsBox.style.display =
+    "block";
+
+}
+
+
+// ======================================================
+// Helpers
+// ======================================================
+
+function scoreText(
+  score
+) {
+
+  if (
+    score === null ||
+    score === undefined
+  ) {
+
+    return "-";
+
+  }
+
+
+  return Math.round(
+    Number(score)
+  );
+
+}
+
+
+function escapeHTML(
+  text
+) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+
+  div.textContent =
+    text;
+
+
+  return div.innerHTML;
+
+}
+
+
+function showError(
+  message
+) {
+
+  errorBox.style.display =
+    "block";
+
+
+  errorBox.textContent =
+    message;
+
+
+  recordButton.disabled =
+    false;
+
+
+  stopButton.disabled =
+    true;
+
+}
+
+
+function hideError() {
+
+  errorBox.style.display =
+    "none";
+
+
+  errorBox.textContent = "";
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
