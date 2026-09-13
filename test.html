@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -20,261 +21,215 @@
     body {
       margin: 0;
       padding: 30px 15px;
-
-      font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+      font-family: Arial, Helvetica, sans-serif;
       background: #f4f6f8;
-
       color: #222;
-
       text-align: center;
     }
 
-
     .container {
-
-      max-width: 650px;
-
+      max-width: 700px;
       margin: 0 auto;
-
       background: white;
-
       padding: 30px;
-
       border-radius: 20px;
-
-      box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     }
 
-
     h1 {
-
       margin-top: 0;
-
       font-size: 30px;
     }
 
-
-    .target-label {
-
-      margin-top: 25px;
-
-      font-size: 18px;
-
-      color: #666;
-    }
-
-
-    .target-word {
-
-      margin: 10px 0 25px;
-
-      font-size: 80px;
-
-      font-weight: bold;
-
-      color: #222;
-    }
-
-
-    button {
-
-      border: none;
-
-      border-radius: 30px;
-
-      padding: 14px 28px;
-
-      margin: 7px;
-
-      font-size: 18px;
-
-      font-weight: bold;
-
-      cursor: pointer;
-    }
-
-
-    #recordButton {
-
-      background: #222;
-
-      color: white;
-    }
-
-
-    #stopButton {
-
-      background: #e53935;
-
-      color: white;
-    }
-
-
-    button:disabled {
-
-      opacity: 0.4;
-
-      cursor: default;
-    }
-
-
-    #status {
-
-      margin-top: 20px;
-
-      min-height: 30px;
-
-      font-size: 19px;
-
-      font-weight: bold;
-    }
-
-
-    .recording {
-
-      color: #d32f2f;
-    }
-
-
-    .results {
-
-      display: none;
-
-      margin-top: 25px;
-
+    .url-box {
+      margin-bottom: 25px;
+      padding: 18px;
+      background: #f3f4f6;
+      border-radius: 14px;
       text-align: left;
     }
 
+    .url-box label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .url-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    #functionUrl {
+      flex: 1;
+      padding: 11px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .save-button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .target-label {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #666;
+    }
+
+    .target-word {
+      margin: 10px 0 25px;
+      font-size: 80px;
+      font-weight: bold;
+    }
+
+    .record-button,
+    .stop-button {
+      border: none;
+      border-radius: 30px;
+      padding: 14px 28px;
+      margin: 7px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .record-button {
+      background: #222;
+      color: white;
+    }
+
+    .stop-button {
+      background: #f4a3a3;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    #status {
+      margin-top: 20px;
+      min-height: 30px;
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .recording {
+      color: #d32f2f;
+    }
+
+    .results {
+      display: none;
+      margin-top: 25px;
+      text-align: left;
+    }
 
     .score-box {
-
       display: grid;
-
-      grid-template-columns:
-        repeat(2, 1fr);
-
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
-
       margin-top: 15px;
     }
 
-
     .score {
-
       padding: 18px 10px;
-
       background: #f3f4f6;
-
       border-radius: 14px;
-
       text-align: center;
     }
 
-
     .score-number {
-
       display: block;
-
       margin-top: 5px;
-
       font-size: 32px;
-
       font-weight: bold;
     }
 
-
     .recognized {
-
       margin-top: 20px;
-
       padding: 15px;
-
       background: #f7f7f7;
-
       border-radius: 12px;
-
       font-size: 17px;
     }
 
-
     .phoneme-title {
-
       margin-top: 25px;
-
       font-size: 21px;
-
       font-weight: bold;
     }
 
-
     .phoneme {
-
       display: flex;
-
       justify-content: space-between;
-
       align-items: center;
-
       margin-top: 10px;
-
       padding: 15px 20px;
-
       background: #f3f4f6;
-
       border-radius: 12px;
     }
 
-
     .phoneme-symbol {
-
       font-size: 30px;
-
       font-weight: bold;
     }
-
 
     .phoneme-score {
-
       font-size: 22px;
-
       font-weight: bold;
     }
 
-
     .error {
-
+      display: none;
       margin-top: 15px;
-
       padding: 15px;
-
       border-radius: 10px;
-
       background: #ffe5e5;
-
       color: #a00000;
-
       word-break: break-word;
     }
 
+    .debug-box {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .debug-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #rawResponse {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #1f1f1f;
+      color: #f1f1f1;
+      padding: 16px;
+      border-radius: 10px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      max-height: 500px;
+      overflow: auto;
+    }
 
     .note {
-
       margin-top: 25px;
-
       color: #666;
-
       line-height: 1.6;
-
       font-size: 15px;
     }
 
-
-    @media (max-width: 500px) {
+    @media (max-width: 550px) {
 
       .container {
         padding: 20px;
@@ -288,56 +243,77 @@
         grid-template-columns: 1fr;
       }
 
+      .url-row {
+        flex-direction: column;
+      }
+
     }
 
   </style>
-</head>
 
+</head>
 
 <body>
 
-
 <div class="container">
-
 
   <h1>🎤 Pronunciation Test</h1>
 
 
-  <div class="target-label">
+  <div class="url-box">
 
-    Say this word:
+    <label>
+      Azure Function URL
+    </label>
+
+    <div class="url-row">
+
+      <input
+        id="functionUrl"
+        type="text"
+        placeholder="https://...azurewebsites.net/api/pronunciation"
+      >
+
+      <button
+        id="saveUrlButton"
+        class="save-button"
+      >
+        Save URL
+      </button>
+
+    </div>
 
   </div>
 
+
+  <div class="target-label">
+    Say this word:
+  </div>
 
   <div class="target-word">
-
     the
-
   </div>
 
 
-  <button id="recordButton">
-
+  <button
+    id="recordButton"
+    class="record-button"
+  >
     🎤 Start Recording
-
   </button>
 
 
   <button
     id="stopButton"
+    class="stop-button"
     disabled
   >
-
-    ⏹ Stop & Score
-
+    ■ Stop & Score
   </button>
 
 
   <div id="status">
-
     Press Start Recording.
-
   </div>
 
 
@@ -346,37 +322,28 @@
     class="results"
   >
 
-
     <div class="score-box">
 
-
       <div class="score">
-
         Pronunciation
-
         <span
           id="pronScore"
           class="score-number"
         >
           -
         </span>
-
       </div>
 
 
       <div class="score">
-
         Accuracy
-
         <span
           id="accuracyScore"
           class="score-number"
         >
           -
         </span>
-
       </div>
-
 
     </div>
 
@@ -389,16 +356,11 @@
 
 
     <div class="phoneme-title">
-
       Phoneme scores
-
     </div>
 
 
-    <div id="phonemes">
-
-    </div>
-
+    <div id="phonemes"></div>
 
   </div>
 
@@ -406,59 +368,42 @@
   <div
     id="errorBox"
     class="error"
-    style="display:none;"
   >
   </div>
 
 
-  <div class="note">
+  <div class="debug-box">
 
-    Test idea:
-    first pronounce <b>the</b> normally.
-    Then try again without putting your tongue
-    between your teeth and compare the scores.
+    <div class="debug-title">
+      Azure Raw Response
+    </div>
+
+    <div id="rawResponse">
+      No response yet.
+    </div>
 
   </div>
 
 
-</div>
+  <div class="note">
+    First pronounce <b>the</b> normally.
+    Then try again without putting your tongue
+    between your teeth and compare the results.
+  </div>
 
+</div>
 
 
 <script>
 
-
-// ======================================================
-// IMPORTANT
-// Paste your Function URL here.
-//
-// Do NOT include ?code=...
-// ======================================================
-
-const FUNCTION_URL =
-  "https://yvonne-pronunciation-api-c4gvc3hwergxcydd.southeastasia-01.azurewebsites.net/api/pronunciation";
-
-
-// Word we are testing
-
 const TARGET_WORD = "the";
-
-
-// Azure wants 16 kHz mono PCM WAV.
 
 const TARGET_SAMPLE_RATE = 16000;
 
 
-// ======================================================
-// Variables
-// ======================================================
-
 let audioContext = null;
-
 let microphoneStream = null;
-
 let sourceNode = null;
-
 let processorNode = null;
 
 let audioChunks = [];
@@ -468,9 +413,11 @@ let inputSampleRate = 44100;
 let recording = false;
 
 
-// ======================================================
-// Elements
-// ======================================================
+const functionUrlInput =
+  document.getElementById("functionUrl");
+
+const saveUrlButton =
+  document.getElementById("saveUrlButton");
 
 const recordButton =
   document.getElementById("recordButton");
@@ -487,10 +434,54 @@ const resultsBox =
 const errorBox =
   document.getElementById("errorBox");
 
+const rawResponseBox =
+  document.getElementById("rawResponse");
 
-// ======================================================
-// Start recording
-// ======================================================
+
+
+function loadSavedUrl() {
+
+  const saved =
+    localStorage.getItem(
+      "pronunciationFunctionUrl"
+    );
+
+  if (saved) {
+    functionUrlInput.value = saved;
+  }
+
+}
+
+
+saveUrlButton.addEventListener(
+  "click",
+  function () {
+
+    const url =
+      functionUrlInput.value.trim();
+
+    if (!url) {
+
+      alert(
+        "Please paste your Azure Function URL first."
+      );
+
+      return;
+    }
+
+    localStorage.setItem(
+      "pronunciationFunctionUrl",
+      url
+    );
+
+    alert(
+      "Function URL saved."
+    );
+
+  }
+);
+
+
 
 recordButton.addEventListener(
   "click",
@@ -502,7 +493,11 @@ async function startRecording() {
 
   hideError();
 
-  resultsBox.style.display = "none";
+  resultsBox.style.display =
+    "none";
+
+  rawResponseBox.textContent =
+    "Waiting for response...";
 
   audioChunks = [];
 
@@ -536,10 +531,6 @@ async function startRecording() {
       );
 
 
-    // ScriptProcessor is used here because
-    // it is simple and works well for this
-    // small pronunciation test.
-
     processorNode =
       audioContext.createScriptProcessor(
         4096,
@@ -549,18 +540,16 @@ async function startRecording() {
 
 
     processorNode.onaudioprocess =
-      function(event) {
+      function (event) {
 
         if (!recording) {
           return;
         }
 
-
         const input =
           event
             .inputBuffer
             .getChannelData(0);
-
 
         audioChunks.push(
           new Float32Array(input)
@@ -573,7 +562,6 @@ async function startRecording() {
       processorNode
     );
 
-
     processorNode.connect(
       audioContext.destination
     );
@@ -581,18 +569,14 @@ async function startRecording() {
 
     recording = true;
 
-
     recordButton.disabled = true;
-
     stopButton.disabled = false;
-
 
     statusBox.className =
       "recording";
 
     statusBox.textContent =
       "🔴 Recording... Say “the” once.";
-
 
   }
 
@@ -608,9 +592,6 @@ async function startRecording() {
 }
 
 
-// ======================================================
-// Stop recording
-// ======================================================
 
 stopButton.addEventListener(
   "click",
@@ -627,19 +608,14 @@ async function stopRecording() {
 
   recording = false;
 
-
   recordButton.disabled = true;
-
   stopButton.disabled = true;
-
 
   statusBox.className = "";
 
   statusBox.textContent =
     "⏳ Preparing audio...";
 
-
-  // Stop microphone
 
   if (microphoneStream) {
 
@@ -652,29 +628,20 @@ async function stopRecording() {
   }
 
 
-  // Disconnect nodes
-
   if (processorNode) {
-
     processorNode.disconnect();
-
   }
-
 
   if (sourceNode) {
-
     sourceNode.disconnect();
-
   }
 
 
-  // Combine audio chunks
-
   const combined =
-    mergeBuffers(audioChunks);
+    mergeBuffers(
+      audioChunks
+    );
 
-
-  // Convert sample rate to 16000 Hz
 
   const downsampled =
     downsampleBuffer(
@@ -684,16 +651,12 @@ async function stopRecording() {
     );
 
 
-  // Encode WAV
-
   const wavBuffer =
     encodeWAV(
       downsampled,
       TARGET_SAMPLE_RATE
     );
 
-
-  // Convert WAV to Base64
 
   const base64Audio =
     arrayBufferToBase64(
@@ -702,9 +665,7 @@ async function stopRecording() {
 
 
   if (audioContext) {
-
     await audioContext.close();
-
   }
 
 
@@ -719,21 +680,14 @@ async function stopRecording() {
 }
 
 
-// ======================================================
-// Merge Float32 chunks
-// ======================================================
 
 function mergeBuffers(chunks) {
 
   let totalLength = 0;
 
-
   chunks.forEach(
     chunk => {
-
-      totalLength +=
-        chunk.length;
-
+      totalLength += chunk.length;
     }
   );
 
@@ -755,8 +709,7 @@ function mergeBuffers(chunks) {
         offset
       );
 
-      offset +=
-        chunk.length;
+      offset += chunk.length;
 
     }
   );
@@ -767,9 +720,6 @@ function mergeBuffers(chunks) {
 }
 
 
-// ======================================================
-// Downsample audio
-// ======================================================
 
 function downsampleBuffer(
   buffer,
@@ -777,19 +727,8 @@ function downsampleBuffer(
   targetRate
 ) {
 
-  if (targetRate === sourceRate) {
-
+  if (sourceRate === targetRate) {
     return buffer;
-
-  }
-
-
-  if (targetRate > sourceRate) {
-
-    throw new Error(
-      "Target sample rate must be lower than input sample rate."
-    );
-
   }
 
 
@@ -812,7 +751,6 @@ function downsampleBuffer(
 
 
   let resultIndex = 0;
-
   let bufferIndex = 0;
 
 
@@ -829,7 +767,6 @@ function downsampleBuffer(
 
 
     let total = 0;
-
     let count = 0;
 
 
@@ -841,7 +778,6 @@ function downsampleBuffer(
     ) {
 
       total += buffer[i];
-
       count++;
 
     }
@@ -866,9 +802,6 @@ function downsampleBuffer(
 }
 
 
-// ======================================================
-// Encode PCM WAV
-// ======================================================
 
 function encodeWAV(
   samples,
@@ -924,16 +857,12 @@ function encodeWAV(
   );
 
 
-  // PCM
-
   view.setUint16(
     20,
     1,
     true
   );
 
-
-  // mono
 
   view.setUint16(
     22,
@@ -962,8 +891,6 @@ function encodeWAV(
     true
   );
 
-
-  // 16 bit
 
   view.setUint16(
     34,
@@ -998,9 +925,6 @@ function encodeWAV(
 }
 
 
-// ======================================================
-// Float audio -> signed 16-bit PCM
-// ======================================================
 
 function floatTo16BitPCM(
   view,
@@ -1015,7 +939,7 @@ function floatTo16BitPCM(
     offset += 2
   ) {
 
-    let sample =
+    const sample =
       Math.max(
         -1,
         Math.min(
@@ -1030,7 +954,7 @@ function floatTo16BitPCM(
 
       sample < 0
         ? sample * 0x8000
-        : sample * 0x7FFF,
+        : sample * 0x7fff,
 
       true
     );
@@ -1040,9 +964,6 @@ function floatTo16BitPCM(
 }
 
 
-// ======================================================
-// WAV string helper
-// ======================================================
 
 function writeString(
   view,
@@ -1066,9 +987,6 @@ function writeString(
 }
 
 
-// ======================================================
-// ArrayBuffer -> Base64
-// ======================================================
 
 function arrayBufferToBase64(
   buffer
@@ -1081,7 +999,6 @@ function arrayBufferToBase64(
 
 
   let binary = "";
-
 
   const chunkSize =
     0x8000;
@@ -1112,14 +1029,13 @@ function arrayBufferToBase64(
   }
 
 
-  return btoa(binary);
+  return btoa(
+    binary
+  );
 
 }
 
 
-// ======================================================
-// Send to Azure Function
-// ======================================================
 
 async function sendToAzure(
   audioBase64
@@ -1127,23 +1043,28 @@ async function sendToAzure(
 
   try {
 
+    const functionUrl =
+      functionUrlInput.value.trim();
 
-    if (
-      FUNCTION_URL.includes(
-        "PASTE_YOUR_FUNCTION_URL_HERE"
-      )
-    ) {
+
+    if (!functionUrl) {
 
       throw new Error(
-        "Please paste your Azure Function URL into FUNCTION_URL first."
+        "Please enter your Azure Function URL."
       );
 
     }
 
 
+    localStorage.setItem(
+      "pronunciationFunctionUrl",
+      functionUrl
+    );
+
+
     const response =
       await fetch(
-        FUNCTION_URL,
+        functionUrl,
         {
 
           method: "POST",
@@ -1166,8 +1087,40 @@ async function sendToAzure(
       );
 
 
-    const data =
-      await response.json();
+    const responseText =
+      await response.text();
+
+
+    let data;
+
+
+    try {
+
+      data =
+        JSON.parse(
+          responseText
+        );
+
+    }
+
+    catch {
+
+      rawResponseBox.textContent =
+        responseText;
+
+      throw new Error(
+        "Azure returned a response that was not JSON."
+      );
+
+    }
+
+
+    rawResponseBox.textContent =
+      JSON.stringify(
+        data,
+        null,
+        2
+      );
 
 
     if (!response.ok) {
@@ -1198,7 +1151,6 @@ async function sendToAzure(
       data
     );
 
-
   }
 
   catch (error) {
@@ -1220,13 +1172,8 @@ async function sendToAzure(
 }
 
 
-// ======================================================
-// Display result
-// ======================================================
 
-function displayResults(
-  data
-) {
+function displayResults(data) {
 
   statusBox.textContent =
     "✅ Assessment complete!";
@@ -1257,9 +1204,7 @@ function displayResults(
       "recognized"
     )
     .innerHTML =
-
       "<b>Azure heard:</b> " +
-
       escapeHTML(
         data.recognizedText ||
         "(nothing)"
@@ -1280,21 +1225,16 @@ function displayResults(
     data.words.length > 0
   ) {
 
-
     data.words.forEach(
       word => {
 
-
-        if (
-          !word.phonemes
-        ) {
+        if (!word.phonemes) {
           return;
         }
 
 
         word.phonemes.forEach(
           phoneme => {
-
 
             const row =
               document.createElement(
@@ -1352,10 +1292,8 @@ function displayResults(
               row
             );
 
-
           }
         );
-
 
       }
     );
@@ -1379,13 +1317,8 @@ function displayResults(
 }
 
 
-// ======================================================
-// Helpers
-// ======================================================
 
-function scoreText(
-  score
-) {
+function scoreText(score) {
 
   if (
     score === null ||
@@ -1397,16 +1330,28 @@ function scoreText(
   }
 
 
+  const number =
+    Number(score);
+
+
+  if (
+    !Number.isFinite(number)
+  ) {
+
+    return "-";
+
+  }
+
+
   return Math.round(
-    Number(score)
+    number
   );
 
 }
 
 
-function escapeHTML(
-  text
-) {
+
+function escapeHTML(text) {
 
   const div =
     document.createElement(
@@ -1423,9 +1368,8 @@ function escapeHTML(
 }
 
 
-function showError(
-  message
-) {
+
+function showError(message) {
 
   errorBox.style.display =
     "block";
@@ -1445,19 +1389,22 @@ function showError(
 }
 
 
+
 function hideError() {
 
   errorBox.style.display =
     "none";
 
-
-  errorBox.textContent = "";
+  errorBox.textContent =
+    "";
 
 }
 
 
-</script>
 
+loadSavedUrl();
+
+</script>
 
 </body>
 
