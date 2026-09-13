@@ -432,6 +432,60 @@ const TARGET_SOUNDS = {
 
 };
 
+/*
+  Phrase Rescue：
+  同一個單字連續失敗 2 次後，
+  下一次開始改用短語作為 Azure 的 ReferenceText。
+
+  注意：
+  - Azure 評估整個短語
+  - 程式最後仍然只抓「目標單字」的 Word Accuracy
+    與指定 Target Sound
+  - 短語中的其他字完全不計分
+*/
+const RESCUE_AFTER_FAILS = 2;
+
+const RESCUE_PHRASES = {
+
+  think:      "think again",
+  thank:      "thank you",
+  three:      "three people",
+
+  the:        "the book",
+  this:       "this one",
+  that:       "that one",
+
+  time:       "time flies",
+  name:       "name tag",
+  same:       "same thing",
+  game:       "game time",
+
+  phone:      "phone call",
+  done:       "done now",
+  fun:        "fun game",
+
+  man:        "that man",
+  moon:       "full moon",
+  money:      "money talks",
+  problem:    "big problem",
+  sometimes:  "sometimes I do",
+
+  gift:       "gift shop",
+  past:       "past tense",
+  next:       "next time",
+  world:      "world peace",
+  word:       "word choice",
+  first:      "first time",
+
+  friend:     "best friend",
+  school:     "school day",
+  student:    "student life",
+  English:    "English class",
+  practice:   "practice time",
+  speak:      "speak clearly"
+
+};
+
 
 
 
@@ -466,6 +520,9 @@ let checking = false;
 let remainingCards = [];
 
 let currentCard = null;
+
+let currentFailCount = 0;
+let rescueMode = false;
 
 let gameStarted = false;
 
@@ -807,6 +864,10 @@ function chooseRandomWord() {
     ];
 
 
+  currentFailCount = 0;
+  rescueMode = false;
+
+
   currentCard.classList.add(
     "active"
   );
@@ -999,8 +1060,25 @@ async function startRecording() {
       "recording";
 
 
+    const recordingTarget =
+      rescueMode
+        ? (
+            RESCUE_PHRASES[
+              currentCard.dataset.word
+            ] ||
+            currentCard.dataset.word
+          )
+        : currentCard.dataset.word;
+
+
     messageBox.textContent =
-      "🔴 Recording... Say the highlighted word once.";
+      rescueMode
+        ? (
+            '🔴 Recording... Say: "' +
+            recordingTarget +
+            '"'
+          )
+        : "🔴 Recording... Say the highlighted word once.";
 
   }
 
@@ -1078,7 +1156,8 @@ async function stopRecordingAndCheck() {
 
 
     handleTryAgain(
-      "I couldn't hear the recording."
+      "I couldn't hear the recording.",
+      false
     );
 
 
@@ -1225,6 +1304,17 @@ async function checkPronunciation(
     currentCard.dataset.word;
 
 
+  const referenceText =
+    rescueMode
+      ? (
+          RESCUE_PHRASES[
+            targetWord
+          ] ||
+          targetWord
+        )
+      : targetWord;
+
+
   try {
 
     const response =
@@ -1248,7 +1338,7 @@ async function checkPronunciation(
             JSON.stringify({
 
               referenceText:
-                targetWord,
+                referenceText,
 
               audioBase64:
                 audioBase64
@@ -1346,7 +1436,9 @@ async function checkPronunciation(
 
 
     speakButton.textContent =
-      "🎤 Try Again";
+      rescueMode
+        ? "🎤 Say the Phrase"
+        : "🎤 Try Again";
 
 
     showWarning(
@@ -1847,6 +1939,10 @@ function handlePass() {
   updateProgress();
 
 
+  currentFailCount = 0;
+  rescueMode = false;
+
+
   currentCard =
     null;
 
@@ -1872,7 +1968,8 @@ function handlePass() {
    ========================================================= */
 
 function handleTryAgain(
-  customMessage = ""
+  customMessage = "",
+  countFailure = true
 ) {
 
   resultBox.textContent =
@@ -1883,6 +1980,37 @@ function handleTryAgain(
     "fail";
 
 
+  /*
+    只有真正的 pronunciation FAIL 才累計。
+    麥克風沒錄到、連線錯誤等技術問題不計。
+  */
+
+  if (
+    countFailure &&
+    currentCard
+  ) {
+
+    currentFailCount++;
+
+  }
+
+
+  /*
+    同一個字失敗 2 次後，自動進入 Phrase Rescue Mode。
+  */
+
+  if (
+    currentCard &&
+    currentFailCount >=
+      RESCUE_AFTER_FAILS
+  ) {
+
+    rescueMode =
+      true;
+
+  }
+
+
   if (customMessage) {
 
     messageBox.textContent =
@@ -1890,10 +2018,45 @@ function handleTryAgain(
 
   }
 
-  else {
+  else if (
+    rescueMode &&
+    currentCard
+  ) {
+
+    const targetWord =
+      currentCard.dataset.word;
+
+
+    const rescuePhrase =
+      RESCUE_PHRASES[
+        targetWord
+      ] ||
+      targetWord;
+
 
     messageBox.textContent =
-      "Try the same word again.";
+      'Phrase rescue: say "' +
+      rescuePhrase +
+      '". Only "' +
+      targetWord +
+      '" will be scored.';
+
+  }
+
+  else {
+
+    const triesLeft =
+      Math.max(
+        0,
+        RESCUE_AFTER_FAILS -
+        currentFailCount
+      );
+
+
+    messageBox.textContent =
+      triesLeft === 1
+        ? "Try the same word again. One more miss will unlock a short phrase."
+        : "Try the same word again.";
 
   }
 
@@ -1908,14 +2071,15 @@ function handleTryAgain(
 
 
   speakButton.textContent =
-    "🎤 Try Again";
+    rescueMode
+      ? "🎤 Say the Phrase"
+      : "🎤 Try Again";
 
 
   speakButton.className =
     "";
 
 }
-
 
 
 /* =========================================================
