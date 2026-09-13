@@ -422,9 +422,9 @@
 
       PASS requirement:<br>
 
-      Accuracy ≥ <b>90</b><br>
+      Accuracy ≥ <b>95</b><br>
 
-      Every phoneme ≥ <b>85</b>
+      Every phoneme ≥ <b>95</b>
 
     </div>
 
@@ -466,9 +466,9 @@ const TARGET_WORD = "the";
 
 const TARGET_SAMPLE_RATE = 16000;
 
-const MIN_ACCURACY = 90;
+const MIN_ACCURACY = 95;
 
-const MIN_PHONEME_SCORE = 85;
+const MIN_PHONEME_SCORE = 95;
 
 
 let audioContext = null;
@@ -1488,7 +1488,7 @@ function showPassFail(
     resultBanner.innerHTML =
       "TRY AGAIN ❌" +
       "<div class='result-subtext'>" +
-      "Say the word again." +
+      "Accuracy and every phoneme must reach 95." +
       "</div>";
 
   }
