@@ -127,6 +127,35 @@
       color: #d32f2f;
     }
 
+    .result-banner {
+      display: none;
+      margin-top: 22px;
+      padding: 20px;
+      border-radius: 16px;
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    .pass {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+      border: 2px solid #22c55e;
+    }
+
+    .fail {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #ef4444;
+    }
+
+    .result-subtext {
+      margin-top: 7px;
+      font-size: 17px;
+      font-weight: normal;
+    }
+
     .results {
       display: none;
       margin-top: 25px;
@@ -188,6 +217,24 @@
       font-weight: bold;
     }
 
+    .phoneme-good {
+      border-left: 7px solid #22c55e;
+    }
+
+    .phoneme-bad {
+      border-left: 7px solid #ef4444;
+    }
+
+    .threshold-box {
+      margin-top: 18px;
+      padding: 14px;
+      background: #fff7ed;
+      border-radius: 12px;
+      color: #7c2d12;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
     .error {
       display: none;
       margin-top: 15px;
@@ -218,7 +265,7 @@
       border-radius: 10px;
       font-family: Consolas, monospace;
       font-size: 13px;
-      max-height: 500px;
+      max-height: 350px;
       overflow: auto;
     }
 
@@ -290,6 +337,7 @@
     Say this word:
   </div>
 
+
   <div class="target-word">
     the
   </div>
@@ -314,6 +362,13 @@
 
   <div id="status">
     Press Start Recording.
+  </div>
+
+
+  <div
+    id="resultBanner"
+    class="result-banner"
+  >
   </div>
 
 
@@ -362,6 +417,17 @@
 
     <div id="phonemes"></div>
 
+
+    <div class="threshold-box">
+
+      PASS requirement:<br>
+
+      Accuracy ≥ <b>90</b><br>
+
+      Every phoneme ≥ <b>85</b>
+
+    </div>
+
   </div>
 
 
@@ -386,9 +452,9 @@
 
 
   <div class="note">
-    First pronounce <b>the</b> normally.
-    Then try again without putting your tongue
-    between your teeth and compare the results.
+    Pronounce the word naturally.
+    If you do not reach the target,
+    try again.
   </div>
 
 </div>
@@ -399,6 +465,10 @@
 const TARGET_WORD = "the";
 
 const TARGET_SAMPLE_RATE = 16000;
+
+const MIN_ACCURACY = 90;
+
+const MIN_PHONEME_SCORE = 85;
 
 
 let audioContext = null;
@@ -437,6 +507,9 @@ const errorBox =
 const rawResponseBox =
   document.getElementById("rawResponse");
 
+const resultBanner =
+  document.getElementById("resultBanner");
+
 
 
 function loadSavedUrl() {
@@ -451,6 +524,7 @@ function loadSavedUrl() {
   }
 
 }
+
 
 
 saveUrlButton.addEventListener(
@@ -489,12 +563,18 @@ recordButton.addEventListener(
 );
 
 
+
 async function startRecording() {
 
   hideError();
 
   resultsBox.style.display =
     "none";
+
+  resultBanner.className =
+    "result-banner";
+
+  resultBanner.innerHTML = "";
 
   rawResponseBox.textContent =
     "Waiting for response...";
@@ -597,6 +677,7 @@ stopButton.addEventListener(
   "click",
   stopRecording
 );
+
 
 
 async function stopRecording() {
@@ -1220,6 +1301,14 @@ function displayResults(data) {
   phonemeBox.innerHTML = "";
 
 
+  let allPhonemesPass =
+    true;
+
+
+  let phonemeCount =
+    0;
+
+
   if (
     data.words &&
     data.words.length > 0
@@ -1236,6 +1325,29 @@ function displayResults(data) {
         word.phonemes.forEach(
           phoneme => {
 
+            phonemeCount++;
+
+
+            const phonemeScore =
+              Number(
+                phoneme.accuracyScore
+              );
+
+
+            const phonemePass =
+              Number.isFinite(
+                phonemeScore
+              ) &&
+              phonemeScore >=
+                MIN_PHONEME_SCORE;
+
+
+            if (!phonemePass) {
+              allPhonemesPass =
+                false;
+            }
+
+
             const row =
               document.createElement(
                 "div"
@@ -1243,7 +1355,12 @@ function displayResults(data) {
 
 
             row.className =
-              "phoneme";
+              "phoneme " +
+              (
+                phonemePass
+                  ? "phoneme-good"
+                  : "phoneme-bad"
+              );
 
 
             const symbol =
@@ -1308,11 +1425,73 @@ function displayResults(data) {
     phonemeBox.innerHTML =
       "<p>No phoneme scores returned.</p>";
 
+    allPhonemesPass =
+      false;
+
   }
+
+
+  const accuracy =
+    Number(
+      data.accuracyScore
+    );
+
+
+  const accuracyPass =
+    Number.isFinite(
+      accuracy
+    ) &&
+    accuracy >=
+      MIN_ACCURACY;
+
+
+  const finalPass =
+    accuracyPass &&
+    allPhonemesPass &&
+    phonemeCount > 0;
+
+
+  showPassFail(
+    finalPass
+  );
 
 
   resultsBox.style.display =
     "block";
+
+}
+
+
+
+function showPassFail(
+  passed
+) {
+
+  if (passed) {
+
+    resultBanner.className =
+      "result-banner pass";
+
+    resultBanner.innerHTML =
+      "PASS ✅" +
+      "<div class='result-subtext'>" +
+      "Great job!" +
+      "</div>";
+
+  }
+
+  else {
+
+    resultBanner.className =
+      "result-banner fail";
+
+    resultBanner.innerHTML =
+      "TRY AGAIN ❌" +
+      "<div class='result-subtext'>" +
+      "Say the word again." +
+      "</div>";
+
+  }
 
 }
 
