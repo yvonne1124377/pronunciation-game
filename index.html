@@ -379,7 +379,7 @@ const FUNCTION_URL =
    PASS 標準
    ========================================================= */
 
-const MIN_ACCURACY = 80;
+const MIN_ACCURACY = 60;
 
 
 
@@ -1312,6 +1312,15 @@ async function checkPronunciation(
    ⭐ 發音判定
    ========================================================= */
 
+function normalizeText(text) {
+
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z']/g, "");
+
+}
+
+
 function evaluatePronunciation(data) {
 
   const accuracy =
@@ -1320,15 +1329,21 @@ function evaluatePronunciation(data) {
     );
 
 
-  /*
-    診斷版 PASS 標準：
-    只看整體 Accuracy >= 80。
+  const expectedWord =
+    currentCard
+      ? normalizeText(
+          currentCard.dataset.word
+        )
+      : "";
 
-    Phoneme 分數只顯示，
-    不參與 PASS / TRY AGAIN 判定。
-  */
 
-  const finalPass =
+  const recognizedWord =
+    normalizeText(
+      data.recognizedText
+    );
+
+
+  const accuracyPass =
 
     Number.isFinite(
       accuracy
@@ -1336,6 +1351,30 @@ function evaluatePronunciation(data) {
 
     accuracy >=
       MIN_ACCURACY;
+
+
+  const recognizedPass =
+
+    expectedWord !== "" &&
+
+    recognizedWord ===
+      expectedWord;
+
+
+  /*
+    正式判定：
+    1. Azure 辨識出的單字必須等於目標字
+    2. Accuracy >= 60
+
+    Phoneme 分數只作為診斷資訊，
+    不參與 PASS / TRY AGAIN。
+  */
+
+  const finalPass =
+
+    recognizedPass &&
+
+    accuracyPass;
 
 
   const phonemeResults =
@@ -1407,8 +1446,18 @@ function evaluatePronunciation(data) {
       : "-";
 
 
+  const recognizedDisplay =
+    data.recognizedText
+      ? data.recognizedText
+      : "-";
+
+
   let detailsText =
-    "Accuracy: " +
+
+    "Recognized: " +
+    recognizedDisplay +
+
+    " | Accuracy: " +
     accuracyDisplay;
 
 
