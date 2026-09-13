@@ -479,15 +479,10 @@ const words = [
 
 /* =========================================================
    ⭐ Azure Function
-
-   這是你的 Azure Function App：
-   yvonne-pronunciation-api
-
-   如果網址之後有改，只需更改這一行。
    ========================================================= */
 
 const FUNCTION_URL =
-  "https://yvonne-pronunciation-api.azurewebsites.net/api/pronunciation";
+  "https://yvonne-pronunciation-api-c4gvc3hwergxcydd.southeastasia-01.azurewebsites.net/api/pronunciation";
 
 
 
@@ -768,12 +763,6 @@ startButton.addEventListener(
 
     hideWarning();
 
-
-    /*
-      先要求麥克風權限。
-      成功後立刻關閉，
-      正式錄音時再重新開啟。
-    */
 
     try {
 
@@ -1462,10 +1451,6 @@ function evaluatePronunciation(
     true;
 
 
-  let lowestPhonemeScore =
-    100;
-
-
   if (
     Array.isArray(
       data.words
@@ -1512,16 +1497,6 @@ function evaluatePronunciation(
             }
 
 
-            lowestPhonemeScore =
-              Math.min(
-
-                lowestPhonemeScore,
-
-                score
-
-              );
-
-
             if (
               score <
               MIN_PHONEME_SCORE
@@ -1564,11 +1539,6 @@ function evaluatePronunciation(
       currentCard.dataset.word
     );
 
-
-  /*
-    Azure 應該也要實際聽到目標字。
-    避免完全不同的字意外通過。
-  */
 
   const recognizedPass =
     recognizedWord ===
@@ -1719,12 +1689,6 @@ function handleTryAgain(
       "Try the same word again.";
 
   }
-
-
-  /*
-    currentCard 不變，
-    所以同一張黃色字卡會繼續亮著。
-  */
 
 
   speakButton.disabled =
