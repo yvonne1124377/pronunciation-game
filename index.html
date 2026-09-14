@@ -148,6 +148,7 @@
       font-weight: bold;
 
       user-select: none;
+      cursor: pointer;
 
       transition:
         opacity 0.45s ease,
@@ -273,7 +274,7 @@
 
 
 <div class="instructions">
-  Watch for the highlighted word.<br>
+  A word will be highlighted first. You may also click any unfinished word you want to practice.<br>
   Say it correctly to reveal the picture!
 </div>
 
@@ -336,8 +337,8 @@
   { word: "next", targets: ["k", "s", "t"], rescue: "next time" }
 
   PASS 標準目前是：
-  Word Accuracy >= 80
-  每個 Target Sound >= 50
+  Word Accuracy >= 70
+  每個 Target Sound >= 35
 */
 const WORD_CONFIG = [
 
@@ -462,8 +463,9 @@ const FUNCTION_URL =
    PASS 標準
    ========================================================= */
 
-const MIN_WORD_ACCURACY = 80;
-const MIN_TARGET_SOUND = 50;
+const MIN_WORD_ACCURACY = 70;
+const MIN_TARGET_SOUND = 35;
+const STRONG_WORD_ACCURACY = 85;
 
 
 
@@ -667,6 +669,16 @@ function createCards() {
         word;
 
 
+      card.addEventListener(
+        "click",
+        function() {
+
+          selectWordCard(card);
+
+        }
+      );
+
+
       game.appendChild(
         card
       );
@@ -858,40 +870,27 @@ startButton.addEventListener(
    隨機選字
    ========================================================= */
 
-function chooseRandomWord() {
+function selectWordCard(card) {
 
   if (
-    remainingCards.length === 0
+    !gameStarted ||
+    !card ||
+    card.classList.contains("completed") ||
+    recording ||
+    checking
   ) {
-
-    finishGame();
-
     return;
-
   }
 
 
   if (currentCard) {
-
     currentCard.classList.remove(
       "active"
     );
-
   }
 
 
-  const randomIndex =
-    Math.floor(
-      Math.random() *
-      remainingCards.length
-    );
-
-
-  currentCard =
-    remainingCards[
-      randomIndex
-    ];
-
+  currentCard = card;
 
   currentFailCount = 0;
   rescueMode = false;
@@ -903,7 +902,7 @@ function chooseRandomWord() {
 
 
   currentTask.textContent =
-    "🎯 Say the highlighted word!";
+    "Say the selected word. You can click another word anytime.";
 
 
   resultBox.textContent =
@@ -922,20 +921,47 @@ function chooseRandomWord() {
     "Press the microphone button when you're ready.";
 
 
+  speakButton.disabled =
+    false;
+
+
   speakButton.textContent =
-    "🎤 Say the Word";
+    "Say the Word";
 
 
   speakButton.className =
     "";
 
-
-  speakButton.disabled =
-    false;
-
 }
 
 
+function chooseRandomWord() {
+
+  if (
+    remainingCards.length === 0
+  ) {
+
+    finishGame();
+
+    return;
+
+  }
+
+
+  const randomIndex =
+    Math.floor(
+      Math.random() *
+      remainingCards.length
+    );
+
+
+  selectWordCard(
+    remainingCards[
+      randomIndex
+    ]
+  );
+
+}
 
 /* =========================================================
    錄音按鈕
@@ -1733,15 +1759,27 @@ function evaluatePronunciation(data) {
     正式 PASS 標準：
 
     1. Azure 的 Words 中必須找到目標字
-    2. 該目標字 Word Accuracy >= 80
-    3. 老師指定的每一個 Target Sound >= 50
+    2. 該目標字 Word Accuracy >= 70
+    3. 老師指定的每一個 Target Sound >= 35
 
     其他 phoneme 不影響 PASS / FAIL。
   */
 
+  const strongWordPass =
+
+    Boolean(wordResult) &&
+
+    Number.isFinite(
+      wordAccuracy
+    ) &&
+
+    wordAccuracy >=
+      STRONG_WORD_ACCURACY;
+
+
   const finalPass =
-    wordPass &&
-    targetPass;
+    (wordPass && targetPass) ||
+    strongWordPass;
 
 
   checking =
@@ -1878,14 +1916,14 @@ function evaluatePronunciation(data) {
   else if (!wordPass) {
 
     messageBox.textContent =
-      "Word Accuracy needs 80 or higher.";
+      "Try again, or click another word and come back to this one later.";
 
   }
 
   else if (!targetPass) {
 
     messageBox.textContent =
-      "Target sound needs 50 or higher.";
+      "Try again, use the phrase if offered, or click another word and continue.";
 
   }
 
@@ -2084,8 +2122,8 @@ function handleTryAgain(
 
     messageBox.textContent =
       triesLeft === 1
-        ? "Try the same word again. One more miss will unlock a short phrase."
-        : "Try the same word again.";
+        ? "Try again, or click another word. One more miss will unlock a short phrase."
+        : "Try again, or click another word and come back later.";
 
   }
 
