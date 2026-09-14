@@ -122,9 +122,7 @@
       aspect-ratio: 3 / 2;
 
       margin: 0 auto;
-
-      background-image:
-        url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=85");
+      background-image: none;
 
       background-size: cover;
       background-position: center;
@@ -322,49 +320,134 @@
 <script>
 
 /* =========================================================
-   單字
+   ★ 老師只需要改這一區 ★
    ========================================================= */
 
-const words = [
+/*
+  每一列包含：
+  word    = 字卡上的單字
+  targets = 要特別檢查的 target sound
+  rescue  = 連續失敗 2 次後可念的短語
 
-  "think",
-  "thank",
-  "three",
-  "the",
-  "this",
-  "that",
+  範例：
+  { word: "think", targets: ["θ"], rescue: "think again" }
 
-  "time",
-  "name",
-  "same",
-  "game",
-  "phone",
-  "done",
+  如果一個字要檢查多個音：
+  { word: "next", targets: ["k", "s", "t"], rescue: "next time" }
 
-  "fun",
-  "man",
-  "moon",
-  "money",
-  "problem",
-  "sometimes",
+  PASS 標準目前是：
+  Word Accuracy >= 80
+  每個 Target Sound >= 50
+*/
+const WORD_CONFIG = [
 
-  "gift",
-  "past",
-  "next",
-  "world",
-  "word",
-  "first",
+  { word: "piece",    targets: ["i"],       rescue: "a piece" },
+  { word: "sheet",    targets: ["i"],       rescue: "a sheet" },
+  { word: "swim",     targets: ["ɪ"],       rescue: "swim fast" },
+  { word: "name",     targets: ["eɪ"],      rescue: "my name" },
+  { word: "late",     targets: ["eɪ"],      rescue: "too late" },
+  { word: "bread",    targets: ["ɛ"],       rescue: "some bread" },
+  { word: "thread",   targets: ["ɛ"],       rescue: "red thread" },
+  { word: "that",     targets: ["æ"],       rescue: "that one" },
+  { word: "glad",     targets: ["æ"],       rescue: "so glad" },
+  { word: "job",      targets: ["ɑ"],       rescue: "good job" },
 
-  "friend",
-  "school",
-  "student",
-  "English",
-  "practice",
-  "speak"
+  { word: "gun",      targets: ["ʌ"],       rescue: "toy gun" },
+  { word: "banana",   targets: ["ə"],       rescue: "a banana" },
+  { word: "earn",     targets: ["ɝ"],       rescue: "earn money" },
+  { word: "nurse",    targets: ["ɝ"],       rescue: "a nurse" },
+  { word: "doctor",   targets: ["ɚ"],       rescue: "a doctor" },
+  { word: "dollar",   targets: ["ɑ"],       rescue: "one dollar" },
+  { word: "thought",  targets: ["ɔ"],       rescue: "I thought" },
+  { word: "phone",    targets: ["oʊ"],      rescue: "my phone" },
+  { word: "tour",     targets: ["ʊr"],      rescue: "a tour" },
+  { word: "moon",     targets: ["u"],       rescue: "the moon" },
+
+  { word: "worm",     targets: ["ɝ"],       rescue: "a worm" },
+  { word: "warm",     targets: ["ɔr"],      rescue: "warm water" },
+  { word: "snail",    targets: ["eɪ"],      rescue: "a snail" },
+  { word: "bright",   targets: ["aɪ"],      rescue: "bright light" },
+  { word: "soil",     targets: ["ɔɪ"],      rescue: "the soil" },
+  { word: "allow",    targets: ["aʊ"],      rescue: "allow it" },
+  { word: "gold",     targets: ["oʊ"],      rescue: "gold ring" },
+  { word: "scare",    targets: ["ɛr"],      rescue: "scare me" },
+  { word: "war",      targets: ["ɔr"],      rescue: "the war" },
+  { word: "world",    targets: ["ɝ"],       rescue: "the world" },
+
+  { word: "thick",    targets: ["θ"],       rescue: "too thick" },
+  { word: "pleasure", targets: ["ʒ"],       rescue: "my pleasure" },
+  { word: "lecture",  targets: ["tʃ"],      rescue: "a lecture" },
+  { word: "swing",    targets: ["ŋ"],       rescue: "the swing" },
+  { word: "maple",    targets: ["l"],       rescue: "maple leaf" },
+  { word: "watched",  targets: ["t"],       rescue: "watched TV" },
+  { word: "stopped",  targets: ["t"],       rescue: "stopped here" },
+  { word: "gained",   targets: ["d"],       rescue: "gained weight" },
+  { word: "fast",     targets: ["s", "t"],  rescue: "very fast" },
+  { word: "left",     targets: ["f", "t"],  rescue: "left side" }
 
 ];
 
 
+/*
+  ★ 圖片清單 ★
+
+  你可以放任意數量的圖片網址。
+  每位學生開啟頁面時會隨機抽一張。
+
+  如果你想「指定」某位學生使用某張圖，
+  在網址後面加：
+      ?image=1
+      ?image=2
+      ?image=3
+  依此類推。
+
+  例如：
+  https://你的網站網址/?image=2
+
+  建議：
+  把自己的圖片上傳到 GitHub repo 的 images 資料夾，
+  然後可寫成：
+      "images/picture1.jpg"
+      "images/picture2.jpg"
+*/
+const IMAGE_URLS = [
+
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=85",
+  "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=85",
+  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=85",
+  "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=85",
+  "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1400&q=85",
+  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1400&q=85"
+
+];
+
+
+/* 以下由程式自動產生，不需要另外改 */
+
+const words =
+  WORD_CONFIG.map(
+    item => item.word
+  );
+
+const TARGET_SOUNDS =
+  Object.fromEntries(
+    WORD_CONFIG.map(
+      item => [
+        item.word,
+        item.targets || []
+      ]
+    )
+  );
+
+const RESCUE_PHRASES =
+  Object.fromEntries(
+    WORD_CONFIG.map(
+      item => [
+        item.word,
+        item.rescue || item.word
+      ]
+    )
+  );
 
 /* =========================================================
    Azure Function
@@ -383,108 +466,9 @@ const MIN_WORD_ACCURACY = 80;
 const MIN_TARGET_SOUND = 50;
 
 
-/*
-  每個單字真正要檢查的重點音。
-  陣列中的每一個音都必須 >= 50。
 
-  注意：
-  - 不是「所有 phoneme 都要 80」
-  - 只檢查老師指定的 target sound
-*/
-const TARGET_SOUNDS = {
-
-  think:      ["θ"],
-  thank:      ["θ"],
-  three:      ["θ"],
-
-  the:        ["ð"],
-  this:       ["ð"],
-  that:       ["ð"],
-
-  time:       ["m"],
-  name:       ["m"],
-  same:       ["m"],
-  game:       ["m"],
-
-  phone:      ["n"],
-  done:       ["n"],
-  fun:        ["n"],
-
-  man:        ["m"],
-  moon:       ["m"],
-  money:      ["m"],
-  problem:    ["m"],
-  sometimes:  ["m"],
-
-  gift:       ["f", "t"],
-  past:       ["s", "t"],
-  next:       ["k", "s", "t"],
-  world:      ["l", "d"],
-  word:       ["d"],
-  first:      ["s", "t"],
-
-  friend:     ["d"],
-  school:     ["s", "k"],
-  student:    ["s", "t"],
-  English:    ["ʃ"],
-  practice:   ["s"],
-  speak:      ["s", "p"]
-
-};
-
-/*
-  Phrase Rescue：
-  同一個單字連續失敗 2 次後，
-  下一次開始改用短語作為 Azure 的 ReferenceText。
-
-  注意：
-  - Azure 評估整個短語
-  - 程式最後仍然只抓「目標單字」的 Word Accuracy
-    與指定 Target Sound
-  - 短語中的其他字完全不計分
-*/
+/* 同一個字連續失敗幾次後，啟用 Phrase Rescue */
 const RESCUE_AFTER_FAILS = 2;
-
-const RESCUE_PHRASES = {
-
-  think:      "think again",
-  thank:      "thank you",
-  three:      "three people",
-
-  the:        "the book",
-  this:       "this one",
-  that:       "that one",
-
-  time:       "time flies",
-  name:       "name tag",
-  same:       "same thing",
-  game:       "game time",
-
-  phone:      "phone call",
-  done:       "done now",
-  fun:        "fun game",
-
-  man:        "that man",
-  moon:       "full moon",
-  money:      "money talks",
-  problem:    "big problem",
-  sometimes:  "sometimes I do",
-
-  gift:       "gift shop",
-  past:       "past tense",
-  next:       "next time",
-  world:      "world peace",
-  word:       "word choice",
-  first:      "first time",
-
-  friend:     "best friend",
-  school:     "school day",
-  student:    "student life",
-  English:    "English class",
-  practice:   "practice time",
-  speak:      "speak clearly"
-
-};
 
 
 
@@ -595,84 +579,37 @@ const finishedMessage =
 
 function findBestGrid(total) {
 
-  let bestColumns = total;
+  /*
+    讓老師改成任意數量的單字時，
+    版面仍會盡量接近 3:2，不要求字數一定能整除。
+  */
 
-  let bestRows = 1;
-
-  let bestDifference =
-    Infinity;
-
-
-  const desiredRatio =
-    1.5;
-
-
-  for (
-    let rows = 1;
-    rows <= total;
-    rows++
-  ) {
-
-    if (
-      total % rows !== 0
-    ) {
-      continue;
-    }
+  const columns =
+    Math.max(
+      1,
+      Math.ceil(
+        Math.sqrt(
+          total * 1.5
+        )
+      )
+    );
 
 
-    const columns =
-      total / rows;
-
-
-    if (
-      columns < rows
-    ) {
-      continue;
-    }
-
-
-    const ratio =
-      columns / rows;
-
-
-    const difference =
-      Math.abs(
-        ratio -
-        desiredRatio
-      );
-
-
-    if (
-      difference <
-      bestDifference
-    ) {
-
-      bestDifference =
-        difference;
-
-      bestColumns =
-        columns;
-
-      bestRows =
-        rows;
-
-    }
-
-  }
+  const rows =
+    Math.max(
+      1,
+      Math.ceil(
+        total / columns
+      )
+    );
 
 
   return {
-
-    columns:
-      bestColumns,
-
-    rows:
-      bestRows
-
+    columns,
+    rows
   };
 
 }
-
 
 
 /* =========================================================
@@ -746,6 +683,98 @@ function createCards() {
   updateProgress();
 
 }
+
+
+
+/* =========================================================
+   圖片選擇
+   ========================================================= */
+
+function chooseGameImage() {
+
+  const game =
+    document.getElementById(
+      "game"
+    );
+
+
+  if (
+    !Array.isArray(IMAGE_URLS) ||
+    IMAGE_URLS.length === 0
+  ) {
+
+    game.style.backgroundImage =
+      "none";
+
+    return;
+
+  }
+
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const requestedImage =
+    Number(
+      params.get("image")
+    );
+
+
+  let imageIndex;
+
+
+  /*
+    ?image=1 代表第一張圖。
+    如果沒有指定，則每次載入頁面隨機選圖。
+  */
+
+  if (
+    Number.isInteger(
+      requestedImage
+    ) &&
+    requestedImage >= 1 &&
+    requestedImage <=
+      IMAGE_URLS.length
+  ) {
+
+    imageIndex =
+      requestedImage - 1;
+
+  }
+
+  else {
+
+    imageIndex =
+      Math.floor(
+        Math.random() *
+        IMAGE_URLS.length
+      );
+
+  }
+
+
+  const selectedImage =
+    IMAGE_URLS[
+      imageIndex
+    ];
+
+
+  game.style.backgroundImage =
+    `url("${selectedImage}")`;
+
+
+  game.dataset.imageNumber =
+    String(
+      imageIndex + 1
+    );
+
+}
+
+
+chooseGameImage();
 
 
 
